@@ -1,0 +1,19 @@
+The issue is that Claude Code in the shell picks up the ANTHROPIC_API_KEY environment variable (set for the app) and tries to use it for API billing instead of your Claude subscription. The fix is to make the shell unset that variable before launching Claude Code, without affecting the app.
+
+Let me add a persistent alias for this:
+
+The .bashrc is read-only. Let me find the right place:
+
+.bashrc is a read-only symlink (managed by Nix), but I can create ~/.bash_profile which doesn't exist yet and takes precedence in login shells:
+
+Now let me also make it bulletproof by creating a wrapper script — since Replit shells aren't always login shells, .bash_profile alone may not always fire:
+
+All done. Here's what was set up and why it works:
+
+The problem: ANTHROPIC_API_KEY is a Replit secret, so it's injected into every shell session. When you run claude, Claude Code sees that key and tries to use it for billing — which conflicts with your subscription login.
+
+The fix: ~/.local/bin/claude is now a wrapper script that strips ANTHROPIC_API_KEY from the environment before launching Claude Code. This means:
+
+Claude Code in the Shell → sees no API key → uses your Claude subscription login ✅
+DiploCaption app → Replit injects ANTHROPIC_API_KEY into the server process as usual → works normally ✅
+This works in every shell (login or not) because it's a binary wrapper, not a shell alias. You don't need to do anything special — just type claude in the Shell and it will use your subscription.

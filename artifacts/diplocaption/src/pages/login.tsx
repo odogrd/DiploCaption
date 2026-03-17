@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useLogin } from "@workspace/api-client-react";
-import { Compass, Loader2, Eye, EyeOff } from "lucide-react";
+import { Compass, Loader2, Eye, EyeOff, ServerCrash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
@@ -10,22 +10,42 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [, setLocation] = useLocation();
   const [error, setError] = useState("");
-  
+  const [serverDown, setServerDown] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLogin();
+
+  const isNetworkError = (err: unknown): boolean =>
+    err instanceof Error &&
+    !("status" in err) &&
+    (err.message.toLowerCase().includes("fetch") ||
+      err.message.toLowerCase().includes("network") ||
+      err.message.toLowerCase().includes("failed"));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
+    setServerDown(false);
+
     loginMutation.mutate(
       { data: { username, password } },
       {
         onSuccess: () => {
           setLocation("/");
         },
-        onError: () => {
-          setError("Invalid credentials. Please try again.");
+        onError: (err: unknown) => {
+          if (isNetworkError(err)) {
+            setServerDown(true);
+            setError("");
+          } else {
+            const status = err && typeof err === "object" && "status" in err
+              ? (err as { status: number }).status
+              : null;
+            if (status === 401) {
+              setError("Invalid credentials. Please try again.");
+            } else {
+              setError("Something went wrong. Please try again.");
+            }
+          }
         }
       }
     );
@@ -56,6 +76,17 @@ export default function Login() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {serverDown && (
+            <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-400 text-sm">
+              <div className="flex items-center gap-2 mb-1">
+                <ServerCrash className="w-4 h-4 shrink-0" />
+                <span className="font-semibold">Server is starting up</span>
+              </div>
+              <p className="text-amber-400/80 text-xs leading-relaxed">
+                The API server is coming online. Wait a few seconds, then try again.
+              </p>
+            </div>
+          )}
           {error && (
             <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-xl text-destructive text-sm text-center">
               {error}
