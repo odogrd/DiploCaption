@@ -1,0 +1,367 @@
+import { useState, useCallback, useEffect } from "react";
+import { Layout } from "@/components/layout";
+import { useDropzone } from "react-dropzone";
+import { UploadCloud, FileImage, Settings2, Sparkles, Download, Save, Loader2, X } from "lucide-react";
+import { fileToBase64, createThumbnail, cn } from "@/lib/utils";
+import { useGetSettings, useGenerateCaptions, useRefineCaption, useRewriteCaption, useSaveHistory } from "@workspace/api-client-react";
+import { CaptionCard } from "@/components/caption-card";
+import { PlatformIcon } from "@/components/platform-icon";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function Generator() {
+  const { data: globalSettings } = useGetSettings();
+  const generateMutation = useGenerateCaptions();
+  const refineMutation = useRefineCaption();
+  const rewriteMutation = useRewriteCaption();
+  const saveHistoryMutation = useSaveHistory();
+  const { toast } = useToast();
+
+  // Upload State
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [base64Data, setBase64Data] = useState<string | null>(null);
+  
+  // Input State
+  const [mapType, setMapType] = useState<"geopolitical" | "historical" | "data-infographic" | "other">("geopolitical");
+  const [contextNotes, setContextNotes] = useState("");
+  
+  // Overrides State
+  const [overrides, setOverrides] = useState<Record<string, any>>({});
+  const [showOverrides, setShowOverrides] = useState(false);
+  
+  // Results State
+  const [results, setResults] = useState<Record<string, string> | null>(null);
+  const [processingPlatforms, setProcessingPlatforms] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (globalSettings && Object.keys(overrides).length === 0) {
+      resetOverrides();
+    }
+  }, [globalSettings]);
+
+  const resetOverrides = () => {
+    if (!globalSettings) return;
+    const mapped: Record<string, any> = {};
+    globalSettings.forEach(s => {
+      mapped[s.platformId] = {
+        instructions: s.instructions,
+        audience: s.audience
+      };
+    });
+    setOverrides(mapped);
+  };
+
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    const selected = acceptedFiles[0];
+    if (selected) {
+      setFile(selected);
+      setPreview(URL.createObjectURL(selected));
+      try {
+        const b64 = await fileToBase64(selected);
+        setBase64Data(b64);
+      } catch (e) {
+        toast({ variant: "destructive", title: "Error", description: "Failed to process image." });
+      }
+    }
+  }, [toast]);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { 'image/jpeg': [], 'image/png': [], 'image/webp': [] },
+    maxFiles: 1
+  });
+
+  const handleGenerate = async () => {
+    if (!base64Data || !file) return;
+    
+    setResults(null);
+    try {
+      const data = await generateMutation.mutateAsync({
+        data: {
+          imageData: base64Data,
+          imageMediaType: file.type,
+          mapType: mapType,
+          contextNotes: contextNotes || null,
+          platformOverrides: overrides as any
+        }
+      });
+      setResults(data as any);
+      toast({ title: "Analysis Complete", description: "Captions generated successfully." });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Generation Failed", description: "Could not generate captions. Please try again." });
+    }
+  };
+
+  const handleCaptionUpdate = (platform: string, text: string) => {
+    if (results) {
+      setResults({ ...results, [platform]: text });
+    }
+  };
+
+  const handleRefine = async (platform: string, instruction: string) => {
+    if (!results) return;
+    setProcessingPlatforms(p => ({ ...p, [platform]: true }));
+    try {
+      const res = await refineMutation.mutateAsync({
+        data: {
+          platform,
+          currentCaption: results[platform],
+          instruction
+        }
+      });
+      handleCaptionUpdate(platform, res.caption);
+    } catch (e) {
+      toast({ variant: "destructive", title: "Refinement Failed", description: "Error refining caption." });
+    } finally {
+      setProcessingPlatforms(p => ({ ...p, [platform]: false }));
+    }
+  };
+
+  const handleRewrite = async (platform: string) => {
+    if (!base64Data || !file || !results) return;
+    setProcessingPlatforms(p => ({ ...p, [platform]: true }));
+    try {
+      const res = await rewriteMutation.mutateAsync({
+        data: {
+          imageData: base64Data,
+          imageMediaType: file.type,
+          platform,
+          mapType,
+          contextNotes: contextNotes || null,
+          instructions: overrides[platform]?.instructions || "",
+          audience: overrides[platform]?.audience || ""
+        }
+      });
+      handleCaptionUpdate(platform, res.caption);
+    } catch (e) {
+      toast({ variant: "destructive", title: "Rewrite Failed", description: "Error rewriting caption." });
+    } finally {
+      setProcessingPlatforms(p => ({ ...p, [platform]: false }));
+    }
+  };
+
+  const handleDownloadAll = () => {
+    if (!results) return;
+    const text = Object.entries(results).map(([k, v]) => `${k.toUpperCase()} ------------------------\n${v}\n\n`).join('');
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `diplocaption-${new Date().getTime()}.txt`;
+    a.click();
+  };
+
+  const handleSaveHistory = async () => {
+    if (!results || !base64Data || !file) return;
+    try {
+      const thumb = await createThumbnail(base64Data, file.type, 400);
+      await saveHistoryMutation.mutateAsync({
+        data: {
+          mapType,
+          contextNotes: contextNotes || null,
+          imageThumbnail: thumb,
+          captions: results as any
+        }
+      });
+      toast({ title: "Saved to History", description: "Session securely logged." });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Save Failed", description: "Could not save history." });
+    }
+  };
+
+  return (
+    <Layout>
+      <div className="max-w-4xl mx-auto space-y-8">
+        
+        {/* Main Upload & Config Area */}
+        <div className="glass-panel rounded-3xl p-6 md:p-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            
+            {/* Left Col: Upload */}
+            <div className="space-y-4">
+              <h2 className="font-serif text-xl font-bold">Source Material</h2>
+              <div 
+                {...getRootProps()} 
+                className={cn(
+                  "relative h-64 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all overflow-hidden",
+                  isDragActive ? "border-primary bg-primary/5" : "border-white/20 hover:border-white/40 hover:bg-white/[0.02]",
+                  preview ? "border-none" : ""
+                )}
+              >
+                <input {...getInputProps()} />
+                {preview ? (
+                  <>
+                    <img src={preview} alt="Upload preview" className="absolute inset-0 w-full h-full object-cover opacity-60" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                    <div className="relative z-10 mt-auto w-full flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-white bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10">
+                        <FileImage className="w-4 h-4" />
+                        <span className="text-xs font-mono truncate max-w-[150px]">{file?.name}</span>
+                      </div>
+                      <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); setFile(null); setPreview(null); setBase64Data(null); }} className="h-8 px-3 rounded-lg z-20 relative">
+                        Change
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                      <UploadCloud className="w-8 h-8 text-primary" />
+                    </div>
+                    <p className="font-medium text-foreground mb-1">Drag map image here</p>
+                    <p className="text-xs text-muted-foreground font-sans">JPG, PNG, WEBP up to 10MB</p>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Right Col: Context */}
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                  Map Type Classification
+                </label>
+                <select 
+                  value={mapType} 
+                  onChange={(e) => setMapType(e.target.value as any)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-primary/50 appearance-none font-sans"
+                >
+                  <option value="geopolitical">Geopolitical / Boundaries</option>
+                  <option value="historical">Historical Context</option>
+                  <option value="data-infographic">Data / Infographic</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                    Briefing Notes (Optional)
+                  </label>
+                  <span className="text-xs text-muted-foreground font-mono">{contextNotes.length}/500</span>
+                </div>
+                <textarea
+                  value={contextNotes}
+                  onChange={(e) => setContextNotes(e.target.value)}
+                  maxLength={500}
+                  placeholder="Key takeaways, specific framing, or required talking points..."
+                  className="w-full h-32 bg-black/40 border border-white/10 rounded-xl p-4 text-sm text-foreground focus:outline-none focus:border-primary/50 resize-none font-sans placeholder:text-white/20"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Overrides Toggle */}
+          <div className="mt-8 pt-6 border-t border-white/10">
+            <button 
+              onClick={() => setShowOverrides(!showOverrides)}
+              className="flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors uppercase tracking-widest"
+            >
+              <Settings2 className="w-4 h-4" />
+              Session Overrides
+            </button>
+            
+            <AnimatePresence>
+              {showOverrides && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden mt-6"
+                >
+                  <div className="bg-black/20 rounded-2xl p-6 border border-white/5 space-y-6">
+                    <p className="text-sm text-muted-foreground">Adjust instructions for this specific generation. Will not overwrite global settings.</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {Object.keys(overrides).map((platform) => (
+                        <div key={platform} className="space-y-3 bg-white/[0.02] p-4 rounded-xl border border-white/5">
+                          <div className="flex items-center gap-2 mb-2">
+                            <PlatformIcon platform={platform} />
+                            <span className="font-semibold capitalize text-sm">{platform}</span>
+                          </div>
+                          <input 
+                            value={overrides[platform]?.audience || ''}
+                            onChange={(e) => setOverrides({...overrides, [platform]: {...overrides[platform], audience: e.target.value}})}
+                            placeholder="Audience"
+                            className="w-full bg-black/40 border border-white/5 rounded-lg px-3 py-2 text-xs focus:border-primary/50"
+                          />
+                          <textarea 
+                            value={overrides[platform]?.instructions || ''}
+                            onChange={(e) => setOverrides({...overrides, [platform]: {...overrides[platform], instructions: e.target.value}})}
+                            placeholder="Instructions"
+                            className="w-full h-20 bg-black/40 border border-white/5 rounded-lg px-3 py-2 text-xs focus:border-primary/50 resize-none"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Generate Action */}
+          <div className="mt-8 pt-8 border-t border-white/10 flex justify-end">
+            <Button 
+              size="lg" 
+              className="w-full md:w-auto min-w-[200px] h-14 text-base tracking-wide font-bold"
+              disabled={!file || generateMutation.isPending}
+              onClick={handleGenerate}
+            >
+              {generateMutation.isPending ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  ANALYZING...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  GENERATE CAPTIONS
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Results Section */}
+        {results && (
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="pt-8 space-y-6"
+          >
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
+              <h2 className="font-serif text-3xl font-bold text-primary">Intelligence Output</h2>
+              <div className="flex gap-3 w-full sm:w-auto">
+                <Button variant="outline" className="flex-1 sm:flex-none gap-2 border-white/10 hover:bg-white/5" onClick={handleDownloadAll}>
+                  <Download className="w-4 h-4" /> Download All
+                </Button>
+                <Button className="flex-1 sm:flex-none gap-2" onClick={handleSaveHistory} disabled={saveHistoryMutation.isPending}>
+                  {saveHistoryMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Save Log
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {Object.entries(results).map(([platform, text]) => (
+                <CaptionCard
+                  key={platform}
+                  platform={platform}
+                  caption={text}
+                  onUpdate={(newText) => handleCaptionUpdate(platform, newText)}
+                  onRefine={(instruction) => handleRefine(platform, instruction)}
+                  onRewrite={() => handleRewrite(platform)}
+                  isProcessing={!!processingPlatforms[platform]}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+      </div>
+    </Layout>
+  );
+}

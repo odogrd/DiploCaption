@@ -1,0 +1,15 @@
+packages:
+  "framer-motion": "For smooth layout transitions, collapsible panels, and premium interactions."
+  "react-dropzone": "For premium drag-and-drop file upload experience."
+  "date-fns": "For readable timestamp formatting in the history view."
+  "clsx": "Utility for constructing className strings conditionally."
+  "tailwind-merge": "Utility to merge tailwind classes safely."
+
+images:
+  - path: "artifacts/diplocaption/public/images/auth-bg.png"
+    description: "Abstract deep navy blue and muted gold geometric pattern, highly sophisticated, intelligence dashboard aesthetic, subtle grid lines, very dark"
+    aspect_ratio: "16:9"
+
+notes:
+  - "Assuming @workspace/api-client-react provides all TanStack Query hooks generated from the OpenAPI spec."
+  - "UI is built with standard Tailwind CSS v4 and framer-motion for premium feel."

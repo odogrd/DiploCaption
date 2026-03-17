@@ -1,15 +1,22 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: DiploCaption API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: settings
+    description: Platform settings operations
+  - name: captions
+    description: Caption generation operations
+  - name: history
+    description: Generation history operations
 paths:
   /healthz:
     get:
@@ -24,6 +31,307 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      description: Authenticate with username and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthStatus"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      description: Clear session cookie
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthStatus"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current auth status
+      responses:
+        "200":
+          description: Auth status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthStatus"
+
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get all platform settings
+      responses:
+        "200":
+          description: Platform settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlatformSetting"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /settings/{platformId}:
+    put:
+      operationId: updateSetting
+      tags: [settings]
+      summary: Update platform setting
+      parameters:
+        - name: platformId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSettingBody"
+      responses:
+        "200":
+          description: Updated setting
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformSetting"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /captions/generate:
+    post:
+      operationId: generateCaptions
+      tags: [captions]
+      summary: Generate captions for all platforms
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateCaptionsBody"
+      responses:
+        "200":
+          description: Generated captions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneratedCaptions"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /captions/refine:
+    post:
+      operationId: refineCaption
+      tags: [captions]
+      summary: Refine a single caption with AI instruction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefineCaptionBody"
+      responses:
+        "200":
+          description: Refined caption
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefinedCaption"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /captions/rewrite:
+    post:
+      operationId: rewriteCaption
+      tags: [captions]
+      summary: Completely rewrite a single platform caption
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RewriteCaptionBody"
+      responses:
+        "200":
+          description: Rewritten caption
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefinedCaption"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /history:
+    get:
+      operationId: getHistory
+      tags: [history]
+      summary: Get generation history
+      responses:
+        "200":
+          description: History entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HistoryEntry"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: saveHistory
+      tags: [history]
+      summary: Save a generation session to history
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaveHistoryBody"
+      responses:
+        "201":
+          description: Saved history entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HistoryEntry"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /history/{id}:
+    delete:
+      operationId: deleteHistory
+      tags: [history]
+      summary: Delete a history entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /images/upload:
+    post:
+      operationId: uploadImage
+      tags: [captions]
+      summary: Upload a map image (base64)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadImageBody"
+      responses:
+        "200":
+          description: Image stored, returns reference key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadImageResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +342,242 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    LoginBody:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+
+    AuthStatus:
+      type: object
+      properties:
+        authenticated:
+          type: boolean
+      required:
+        - authenticated
+
+    PlatformSetting:
+      type: object
+      properties:
+        platformId:
+          type: string
+        instructions:
+          type: string
+        audience:
+          type: string
+        language:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - platformId
+        - instructions
+        - audience
+        - language
+        - updatedAt
+
+    UpdateSettingBody:
+      type: object
+      properties:
+        instructions:
+          type: string
+        audience:
+          type: string
+        language:
+          type: string
+      required:
+        - instructions
+        - audience
+        - language
+
+    PlatformOverride:
+      type: object
+      properties:
+        instructions:
+          type: string
+        audience:
+          type: string
+      required:
+        - instructions
+        - audience
+
+    PlatformOverrides:
+      type: object
+      properties:
+        instagram:
+          $ref: "#/components/schemas/PlatformOverride"
+        facebook:
+          $ref: "#/components/schemas/PlatformOverride"
+        substack:
+          $ref: "#/components/schemas/PlatformOverride"
+        x:
+          $ref: "#/components/schemas/PlatformOverride"
+        bluesky:
+          $ref: "#/components/schemas/PlatformOverride"
+      required:
+        - instagram
+        - facebook
+        - substack
+        - x
+        - bluesky
+
+    GenerateCaptionsBody:
+      type: object
+      properties:
+        imageData:
+          type: string
+          description: Base64-encoded image data
+        imageMediaType:
+          type: string
+          description: MIME type of the image
+        mapType:
+          type: string
+          enum: [geopolitical, historical, data-infographic, other]
+        contextNotes:
+          type: ["string", "null"]
+        platformOverrides:
+          $ref: "#/components/schemas/PlatformOverrides"
+      required:
+        - imageData
+        - imageMediaType
+        - mapType
+        - platformOverrides
+
+    GeneratedCaptions:
+      type: object
+      properties:
+        instagram:
+          type: string
+        facebook:
+          type: string
+        substack:
+          type: string
+        x:
+          type: string
+        bluesky:
+          type: string
+      required:
+        - instagram
+        - facebook
+        - substack
+        - x
+        - bluesky
+
+    RefineCaptionBody:
+      type: object
+      properties:
+        platform:
+          type: string
+        currentCaption:
+          type: string
+        instruction:
+          type: string
+      required:
+        - platform
+        - currentCaption
+        - instruction
+
+    RewriteCaptionBody:
+      type: object
+      properties:
+        imageData:
+          type: string
+        imageMediaType:
+          type: string
+        platform:
+          type: string
+        mapType:
+          type: string
+        contextNotes:
+          type: ["string", "null"]
+        instructions:
+          type: string
+        audience:
+          type: string
+      required:
+        - imageData
+        - imageMediaType
+        - platform
+        - mapType
+        - instructions
+        - audience
+
+    RefinedCaption:
+      type: object
+      properties:
+        caption:
+          type: string
+      required:
+        - caption
+
+    UploadImageBody:
+      type: object
+      properties:
+        imageData:
+          type: string
+          description: Base64-encoded image data
+        mediaType:
+          type: string
+      required:
+        - imageData
+        - mediaType
+
+    UploadImageResponse:
+      type: object
+      properties:
+        imageKey:
+          type: string
+      required:
+        - imageKey
+
+    SaveHistoryBody:
+      type: object
+      properties:
+        mapType:
+          type: string
+        contextNotes:
+          type: ["string", "null"]
+        imageThumbnail:
+          type: ["string", "null"]
+          description: Base64 thumbnail
+        captions:
+          $ref: "#/components/schemas/GeneratedCaptions"
+      required:
+        - mapType
+        - captions
+
+    HistoryEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        mapType:
+          type: string
+        contextNotes:
+          type: ["string", "null"]
+        imageThumbnail:
+          type: ["string", "null"]
+        captions:
+          $ref: "#/components/schemas/GeneratedCaptions"
+      required:
+        - id
+        - createdAt
+        - mapType
+        - captions
