@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PlatformIcon, platformLabel } from "./platform-icon";
+import { PlatformIcon } from "./platform-icon";
 import { Button } from "./ui/button";
 import { Check, Copy, Edit2, Sparkles, RefreshCw, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 
 interface CaptionCardProps {
   platform: string;
-  variantName?: string;
   caption: string;
   onUpdate: (newCaption: string) => void;
   onRefine: (instruction: string) => Promise<void>;
@@ -15,7 +14,7 @@ interface CaptionCardProps {
   isProcessing: boolean;
 }
 
-export function CaptionCard({ platform, variantName, caption, onUpdate, onRefine, onRewrite, isProcessing }: CaptionCardProps) {
+export function CaptionCard({ platform, caption, onUpdate, onRefine, onRewrite, isProcessing }: CaptionCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [localText, setLocalText] = useState(caption);
   const [refineInstruction, setRefineInstruction] = useState("");
@@ -66,10 +65,7 @@ export function CaptionCard({ platform, variantName, caption, onUpdate, onRefine
       <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
         <div className="flex items-center gap-3">
           <PlatformIcon platform={platform} className="text-xl" />
-          <div>
-            <h3 className="font-serif font-semibold text-lg leading-tight">{platformLabel(platform)}</h3>
-            {variantName && <p className="text-xs text-muted-foreground font-mono">{variantName}</p>}
-          </div>
+          <h3 className="font-serif font-semibold text-lg capitalize">{platform}</h3>
         </div>
         <div className="flex items-center gap-2">
           {limit && (

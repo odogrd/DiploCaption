@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useLogin } from "@workspace/api-client-react";
+import { useLogin, getGetMeQueryKey } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Compass, Loader2, Eye, EyeOff, ServerCrash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -13,6 +14,7 @@ export default function Login() {
   const [serverDown, setServerDown] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLogin();
+  const queryClient = useQueryClient();
 
   const isNetworkError = (err: unknown): boolean =>
     err instanceof Error &&
@@ -29,7 +31,8 @@ export default function Login() {
     loginMutation.mutate(
       { data: { username, password } },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
           setLocation("/");
         },
         onError: (err: unknown) => {

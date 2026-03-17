@@ -1,0 +1,151 @@
+import { useState, useEffect } from "react";
+import { Layout } from "@/components/layout";
+import { useGetSettings, useUpdateSetting } from "@workspace/api-client-react";
+import { PlatformIcon } from "@/components/platform-icon";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, Save } from "lucide-react";
+import { motion } from "framer-motion";
+
+export default function Settings() {
+  const { data: settings, isLoading } = useGetSettings();
+  const updateMutation = useUpdateSetting();
+  const { toast } = useToast();
+
+  const [localSettings, setLocalSettings] = useState<Record<string, any>>({});
+  const [savingPlatform, setSavingPlatform] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (settings) {
+      const mapped: Record<string, any> = {};
+      settings.forEach(s => {
+        mapped[s.platformId] = {
+          instructions: s.instructions,
+          audience: s.audience,
+          language: s.language
+        };
+      });
+      setLocalSettings(mapped);
+    }
+  }, [settings]);
+
+  const handleChange = (platformId: string, field: string, value: string) => {
+    setLocalSettings(prev => ({
+      ...prev,
+      [platformId]: {
+        ...prev[platformId],
+        [field]: value
+      }
+    }));
+  };
+
+  const handleSave = async (platformId: string) => {
+    setSavingPlatform(platformId);
+    try {
+      await updateMutation.mutateAsync({
+        platformId,
+        data: localSettings[platformId]
+      });
+      toast({ title: "Settings Saved", description: `${platformId} configuration updated.` });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Error", description: "Failed to save settings." });
+    } finally {
+      setSavingPlatform(null);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        </div>
+      </Layout>
+    );
+  }
+
+  const platforms = ['instagram', 'facebook', 'substack', 'x', 'bluesky'];
+
+  return (
+    <Layout>
+      <div className="mb-10">
+        <h1 className="text-4xl font-serif font-bold text-foreground mb-4">Platform Configuration</h1>
+        <p className="text-muted-foreground text-lg max-w-2xl">
+          Define the global default tone, instructions, and audience for each social channel. These defaults apply to all new caption generations.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {platforms.map((platform, idx) => {
+          const config = localSettings[platform] || { instructions: '', audience: '', language: 'English' };
+          const isSaving = savingPlatform === platform;
+
+          return (
+            <motion.div 
+              key={platform}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              className="glass-panel rounded-2xl p-6 md:p-8 flex flex-col gap-6"
+            >
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center gap-3">
+                  <PlatformIcon platform={platform} className="text-2xl" />
+                  <h2 className="text-xl font-serif font-bold capitalize">{platform}</h2>
+                </div>
+                <select 
+                  value={config.language}
+                  onChange={(e) => handleChange(platform, 'language', e.target.value)}
+                  className="bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-primary"
+                >
+                  <option value="English">English</option>
+                  <option value="Arabic">Arabic</option>
+                  <option value="French">French</option>
+                  <option value="Spanish">Spanish</option>
+                  <option value="Italian">Italian</option>
+                </select>
+              </div>
+
+              <div className="space-y-4 flex-1">
+                <div>
+                  <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2">
+                    System Instructions
+                  </label>
+                  <textarea
+                    value={config.instructions}
+                    onChange={(e) => handleChange(platform, 'instructions', e.target.value)}
+                    className="w-full h-28 bg-black/20 border border-white/5 rounded-xl p-4 text-sm text-foreground focus:outline-none focus:border-primary/50 resize-none font-sans"
+                    placeholder="E.g., Maintain an authoritative tone, use bullet points..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2">
+                    Target Audience
+                  </label>
+                  <input
+                    type="text"
+                    value={config.audience}
+                    onChange={(e) => handleChange(platform, 'audience', e.target.value)}
+                    className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-primary/50 font-sans"
+                    placeholder="E.g., Policy makers, general public..."
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <Button 
+                  onClick={() => handleSave(platform)} 
+                  disabled={isSaving}
+                  className="w-full gap-2"
+                >
+                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Save {platform} Defaults
+                </Button>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </Layout>
+  );
+}

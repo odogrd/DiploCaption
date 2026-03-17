@@ -26,63 +26,59 @@ You will receive:
 1. An image of a map
 2. The map type (geopolitical / historical / data-infographic / other)
 3. Optional context notes from the author
-4. Per-platform configurations, each with an audience and one or more named style variants
+4. Per-platform instructions and audience descriptions
 
-Your task: for each platform, generate one caption per style variant. Return a valid JSON object where each platform key maps to an array of caption strings, in the same order as the variants listed.`;
-
-type PlatformVariant = { variantName: string; instructions: string };
-
-type PlatformOverridesInput = Record<string, {
-  audience: string;
-  variants: PlatformVariant[];
-}>;
-
-const PLATFORM_LABELS: Record<string, string> = {
-  instagram: "INSTAGRAM",
-  facebook: "FACEBOOK",
-  substack_post: "SUBSTACK POST",
-  substack_note: "SUBSTACK NOTE",
-  x: "X (TWITTER)",
-  bluesky: "BLUESKY",
-};
-
-const PLATFORM_FORMATS: Record<string, string> = {
-  instagram: "Engaging caption optimized for Instagram. Use line breaks. Include 3–5 hashtags only if highly relevant.",
-  facebook: "Conversational and informative. Can be slightly longer than Instagram. Hashtags only if relevant.",
-  substack_post: "2–3 sentence intro paragraph for a full newsletter post. Sets context and invites the reader in. No hashtags.",
-  substack_note: "1–2 sentence punchy note. Sharp observation or takeaway. No hashtags.",
-  x: "Concise, maximum 280 characters. Punchy. No hashtags unless essential.",
-  bluesky: "Similar to X but max 300 characters. Thoughtful and direct. Hashtags only if very relevant.",
-};
-
-const PLATFORM_ORDER = ["instagram", "facebook", "substack_post", "substack_note", "x", "bluesky"];
+Your task: generate one caption per platform, each optimized for that platform's format, audience, and norms. Return your response as a valid JSON object with keys: instagram, facebook, substack_post, substack_note, x, bluesky.`;
 
 function buildUserPrompt(
   mapType: string,
   contextNotes: string | null | undefined,
-  overrides: PlatformOverridesInput,
+  overrides: {
+    instagram: { instructions: string; audience: string };
+    facebook: { instructions: string; audience: string };
+    substack_post: { instructions: string; audience: string };
+    substack_note: { instructions: string; audience: string };
+    x: { instructions: string; audience: string };
+    bluesky: { instructions: string; audience: string };
+  }
 ): string {
-  const sections = PLATFORM_ORDER
-    .filter((pid) => overrides[pid])
-    .map((pid) => {
-      const { audience, variants } = overrides[pid];
-      const label = PLATFORM_LABELS[pid] ?? pid.toUpperCase();
-      const format = PLATFORM_FORMATS[pid] ?? "Platform-appropriate format.";
-      const variantLines = variants
-        .map((v, i) => `  Variant ${i + 1} — "${v.variantName}": ${v.instructions}`)
-        .join("\n");
-      return `${label}\nAudience: ${audience}\nFormat: ${format}\nStyle variants:\n${variantLines}`;
-    });
-
   return `Map type: ${mapType}
 
 Author's additional context: ${contextNotes || "None provided"}
 
-Generate captions for the following platforms. For each platform, output one caption per variant in the listed order.
+Generate captions for the following platforms:
 
-${sections.join("\n\n")}
+INSTAGRAM
+Instructions: ${overrides.instagram.instructions}
+Audience: ${overrides.instagram.audience}
+Format: Engaging caption optimized for Instagram. Use line breaks. Include 3–5 hashtags only if highly relevant to the content.
 
-Return only a valid JSON object. Each key is a platform id (instagram, facebook, substack_post, substack_note, x, bluesky). Each value is an array of caption strings, one per variant in order. No preamble, no markdown, no explanation.`;
+FACEBOOK
+Instructions: ${overrides.facebook.instructions}
+Audience: ${overrides.facebook.audience}
+Format: Conversational and informative. Can be slightly longer than Instagram. Hashtags only if relevant.
+
+SUBSTACK POST
+Instructions: ${overrides.substack_post.instructions}
+Audience: ${overrides.substack_post.audience}
+Format: 2–3 sentence intro paragraph for a full newsletter post. Sets context and invites the reader in. No hashtags.
+
+SUBSTACK NOTE
+Instructions: ${overrides.substack_note.instructions}
+Audience: ${overrides.substack_note.audience}
+Format: 1–2 sentence punchy note. Sharp observation or takeaway. No hashtags.
+
+X (TWITTER)
+Instructions: ${overrides.x.instructions}
+Audience: ${overrides.x.audience}
+Format: Concise, maximum 280 characters. Punchy. No hashtags unless essential.
+
+BLUESKY
+Instructions: ${overrides.bluesky.instructions}
+Audience: ${overrides.bluesky.audience}
+Format: Similar to X but max 300 characters. Thoughtful and direct. Hashtags only if very relevant.
+
+Return only a valid JSON object. No preamble, no markdown formatting, no explanation.`;
 }
 
 router.post("/captions/generate", requireAuth, async (req, res): Promise<void> => {
@@ -95,13 +91,13 @@ router.post("/captions/generate", requireAuth, async (req, res): Promise<void> =
   const { imageData, imageMediaType, mapType, contextNotes, platformOverrides } = parsed.data;
 
   const client = getClient();
-  const userPrompt = buildUserPrompt(mapType, contextNotes, platformOverrides as PlatformOverridesInput);
+  const userPrompt = buildUserPrompt(mapType, contextNotes, platformOverrides);
 
   let response;
   try {
     response = await client.messages.create({
       model: "claude-sonnet-4-6",
-      max_tokens: 4096,
+      max_tokens: 2048,
       system: SYSTEM_PROMPT,
       messages: [
         {
@@ -115,7 +111,10 @@ router.post("/captions/generate", requireAuth, async (req, res): Promise<void> =
                 data: imageData,
               },
             },
-            { type: "text", text: userPrompt },
+            {
+              type: "text",
+              text: userPrompt,
+            },
           ],
         },
       ],
@@ -133,31 +132,17 @@ router.post("/captions/generate", requireAuth, async (req, res): Promise<void> =
     return;
   }
 
-  let rawCaptions: Record<string, string[]>;
+  let captions: Record<string, string>;
   try {
     const rawText = textContent.text.trim();
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-    rawCaptions = JSON.parse(jsonMatch ? jsonMatch[0] : rawText);
+    captions = JSON.parse(jsonMatch ? jsonMatch[0] : rawText);
   } catch {
     res.status(500).json({ error: "Failed to parse AI response as JSON" });
     return;
   }
 
-  // Attach variantNames to each caption array
-  const overridesTyped = platformOverrides as PlatformOverridesInput;
-  const result: Record<string, { variantName: string; caption: string }[]> = {};
-  for (const pid of PLATFORM_ORDER) {
-    const captions = rawCaptions[pid];
-    const variants = overridesTyped[pid]?.variants ?? [];
-    if (captions) {
-      result[pid] = captions.map((caption, i) => ({
-        variantName: variants[i]?.variantName ?? `Variant ${i + 1}`,
-        caption,
-      }));
-    }
-  }
-
-  res.json(GenerateCaptionsResponse.parse(result));
+  res.json(GenerateCaptionsResponse.parse(captions));
 });
 
 router.post("/captions/refine", requireAuth, async (req, res): Promise<void> => {
@@ -210,16 +195,25 @@ router.post("/captions/rewrite", requireAuth, async (req, res): Promise<void> =>
 
   const { imageData, imageMediaType, platform, mapType, contextNotes, instructions, audience } = parsed.data;
 
+  const platformFormats: Record<string, string> = {
+    instagram: "Engaging caption optimized for Instagram. Use line breaks. Include 3–5 hashtags only if highly relevant.",
+    facebook: "Conversational and informative. Can be slightly longer than Instagram. Hashtags only if relevant.",
+    substack_post: "2–3 sentence intro paragraph for a full newsletter post. Sets context and invites the reader in. No hashtags.",
+    substack_note: "1–2 sentence punchy Substack Note. Sharp observation or takeaway. No hashtags.",
+    x: "Concise, maximum 280 characters. Punchy. No hashtags unless essential.",
+    bluesky: "Similar to X but max 300 characters. Thoughtful and direct. Hashtags only if very relevant.",
+  };
+
   const client = getClient();
   const userPrompt = `Map type: ${mapType}
 
 Author's additional context: ${contextNotes || "None provided"}
 
-Generate a fresh, entirely different caption for ${PLATFORM_LABELS[platform] ?? platform.toUpperCase()}. Do not reuse phrasing from any previous version.
+Generate a fresh, entirely different caption for ${platform.toUpperCase()}. Do not reuse phrasing from any previous version.
 
 Instructions: ${instructions}
 Audience: ${audience}
-Format: ${PLATFORM_FORMATS[platform] ?? "Platform-appropriate format."}
+Format: ${platformFormats[platform] || "Platform-appropriate format."}
 
 Return only the caption text, no explanation.`;
 

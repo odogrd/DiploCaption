@@ -1,0 +1,497 @@
+/home/runner/workspace/artifacts/diplocaption/src/pages/settings.tsx-64-    );
+/home/runner/workspace/artifacts/diplocaption/src/pages/settings.tsx-65-  }
+/home/runner/workspace/artifacts/diplocaption/src/pages/settings.tsx-66-
+artifacts/diplocaption/src/pages/settings.tsx:67:  const platforms = ['instagram', 'facebook', 'substack', 'x', 'bluesky'];
+/home/runner/workspace/artifacts/diplocaption/src/pages/settings.tsx-68-
+/home/runner/workspace/artifacts/diplocaption/src/pages/settings.tsx-69-  return (
+/home/runner/workspace/artifacts/diplocaption/src/pages/settings.tsx-70-    <Layout>
+--
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-28-3. Optional context notes from the author
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-29-4. Per-platform instructions and audience descriptions
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-30-
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2:31:Your task: generate one caption per platform, each optimized for that platform's format, audience, and norms. Return your response as a valid JSON object with keys: instagram, facebook, substack, x, bluesky.`;
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-32-
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-33-function buildUserPrompt(
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-34-  mapType: string,
+--
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-36-  overrides: {
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-37-    instagram: { instructions: string; audience: string };
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-38-    facebook: { instructions: string; audience: string };
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2:39:    substack: { instructions: string; audience: string };
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-40-    x: { instructions: string; audience: string };
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-41-    bluesky: { instructions: string; audience: string };
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-42-  }
+--
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-57-Audience: ${overrides.facebook.audience}
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-58-Format: Conversational and informative. Can be slightly longer than Instagram. Hashtags only if relevant.
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-59-
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2:60:SUBSTACK
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2:61:Instructions: ${overrides.substack.instructions}
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2:62:Audience: ${overrides.substack.audience}
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2:63:Format: Short introductory paragraph suitable for a Substack newsletter post or note. No hashtags.
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-64-
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-65-X (TWITTER)
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-66-Instructions: ${overrides.x.instructions}
+--
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-188-  const platformFormats: Record<string, string> = {
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-189-    instagram: "Engaging caption optimized for Instagram. Use line breaks. Include 3–5 hashtags only if highly relevant.",
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-190-    facebook: "Conversational and informative. Can be slightly longer than Instagram. Hashtags only if relevant.",
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2:191:    substack: "Short introductory paragraph suitable for a Substack newsletter post or note. No hashtags.",
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-192-    x: "Concise, maximum 280 characters. Punchy. No hashtags unless essential.",
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-193-    bluesky: "Similar to X but max 300 characters. Thoughtful and direct. Hashtags only if very relevant.",
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v2-194-  };
+--
+/home/runner/workspace/replit.md-2-
+/home/runner/workspace/replit.md-3-## Overview
+/home/runner/workspace/replit.md-4-
+replit.md:5:DiploCaption is a private, single-user web app for generating AI-powered social media captions from geopolitical map images. Upload a DiploMap image and instantly get tailored captions for 5 platforms (Instagram, Facebook, Substack, X, Bluesky) using Claude vision AI.
+/home/runner/workspace/replit.md-6-
+/home/runner/workspace/replit.md-7-## Stack
+/home/runner/workspace/replit.md-8-
+--
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-28-3. Optional context notes from the author
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-29-4. Per-platform instructions and audience descriptions
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-30-
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1:31:Your task: generate one caption per platform, each optimized for that platform's format, audience, and norms. Return your response as a valid JSON object with keys: instagram, facebook, substack, x, bluesky.`;
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-32-
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-33-function buildUserPrompt(
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-34-  mapType: string,
+--
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-36-  overrides: {
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-37-    instagram: { instructions: string; audience: string };
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-38-    facebook: { instructions: string; audience: string };
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1:39:    substack: { instructions: string; audience: string };
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-40-    x: { instructions: string; audience: string };
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-41-    bluesky: { instructions: string; audience: string };
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-42-  }
+--
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-57-Audience: ${overrides.facebook.audience}
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-58-Format: Conversational and informative. Can be slightly longer than Instagram. Hashtags only if relevant.
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-59-
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1:60:SUBSTACK
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1:61:Instructions: ${overrides.substack.instructions}
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1:62:Audience: ${overrides.substack.audience}
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1:63:Format: Short introductory paragraph suitable for a Substack newsletter post or note. No hashtags.
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-64-
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-65-X (TWITTER)
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-66-Instructions: ${overrides.x.instructions}
+--
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-176-  const platformFormats: Record<string, string> = {
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-177-    instagram: "Engaging caption optimized for Instagram. Use line breaks. Include 3–5 hashtags only if highly relevant.",
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-178-    facebook: "Conversational and informative. Can be slightly longer than Instagram. Hashtags only if relevant.",
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1:179:    substack: "Short introductory paragraph suitable for a Substack newsletter post or note. No hashtags.",
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-180-    x: "Concise, maximum 280 characters. Punchy. No hashtags unless essential.",
+.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-181-    bluesky: "Similar to X but max 300 characters. Thoughtful and direct. Hashtags only if very relevant.",
+/home/runner/workspace/.claude-user/file-history/03256cd1-a80d-46d9-a2aa-d674155934ad/8050cc114bb02316@v1-182-  };
+--
+/home/runner/workspace/artifacts/diplocaption/src/components/platform-icon.tsx-7-  switch(p) {
+artifacts/diplocaption/src/components/platform-icon.tsx-8-    case 'instagram': emoji = "📸"; break;
+artifacts/diplocaption/src/components/platform-icon.tsx-9-    case 'facebook': emoji = "👥"; break;
+artifacts/diplocaption/src/components/platform-icon.tsx:10:    case 'substack': emoji = "📧"; break;
+artifacts/diplocaption/src/components/platform-icon.tsx-11-    case 'x': emoji = "𝕏"; break;
+artifacts/diplocaption/src/components/platform-icon.tsx-12-    case 'bluesky': emoji = "🦋"; break;
+/home/runner/workspace/artifacts/diplocaption/src/components/platform-icon.tsx-13-  }
+--
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a09dff3279e564beb.jsonl:1:[Omitted long matching line]
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a09dff3279e564beb.jsonl:2:[Omitted long matching line]
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a09dff3279e564beb.jsonl:3:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a09dff3279e564beb.jsonl-4-[Omitted long context line]
+--
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a09dff3279e564beb.meta.json:1:{"agentType":"Explore","description":"Find all substack references"}
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl-31-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl-32-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl-33-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl:34:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl-35-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl-36-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl-37-[Omitted long context line]
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl-44-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl-45-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl-46-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl:47:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl-48-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl-49-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl-50-[Omitted long context line]
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl-65-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl-66-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl-67-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39/subagents/agent-a2fec6dac35245a2a.jsonl:68:[Omitted long matching line]
+--
+lib/api-zod/src/generated/api.ts-98-      instructions: zod.string(),
+lib/api-zod/src/generated/api.ts-99-      audience: zod.string(),
+/home/runner/workspace/lib/api-zod/src/generated/api.ts-100-    }),
+lib/api-zod/src/generated/api.ts:101:    substack: zod.object({
+lib/api-zod/src/generated/api.ts-102-      instructions: zod.string(),
+lib/api-zod/src/generated/api.ts-103-      audience: zod.string(),
+/home/runner/workspace/lib/api-zod/src/generated/api.ts-104-    }),
+--
+/home/runner/workspace/lib/api-zod/src/generated/api.ts-116-export const GenerateCaptionsResponse = zod.object({
+lib/api-zod/src/generated/api.ts-117-  instagram: zod.string(),
+lib/api-zod/src/generated/api.ts-118-  facebook: zod.string(),
+lib/api-zod/src/generated/api.ts:119:  substack: zod.string(),
+lib/api-zod/src/generated/api.ts-120-  x: zod.string(),
+lib/api-zod/src/generated/api.ts-121-  bluesky: zod.string(),
+/home/runner/workspace/lib/api-zod/src/generated/api.ts-122-});
+--
+lib/api-zod/src/generated/api.ts-163-  captions: zod.object({
+lib/api-zod/src/generated/api.ts-164-    instagram: zod.string(),
+lib/api-zod/src/generated/api.ts-165-    facebook: zod.string(),
+lib/api-zod/src/generated/api.ts:166:    substack: zod.string(),
+lib/api-zod/src/generated/api.ts-167-    x: zod.string(),
+lib/api-zod/src/generated/api.ts-168-    bluesky: zod.string(),
+/home/runner/workspace/lib/api-zod/src/generated/api.ts-169-  }),
+--
+lib/api-zod/src/generated/api.ts-180-  captions: zod.object({
+lib/api-zod/src/generated/api.ts-181-    instagram: zod.string(),
+lib/api-zod/src/generated/api.ts-182-    facebook: zod.string(),
+lib/api-zod/src/generated/api.ts:183:    substack: zod.string(),
+lib/api-zod/src/generated/api.ts-184-    x: zod.string(),
+lib/api-zod/src/generated/api.ts-185-    bluesky: zod.string(),
+/home/runner/workspace/lib/api-zod/src/generated/api.ts-186-  }),
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-24-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-25-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-26-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl:27:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-28-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-29-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-30-[Omitted long context line]
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-32-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-33-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-34-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl:35:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-36-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-37-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-38-[Omitted long context line]
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-49-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-50-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-51-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl:52:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-53-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-54-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-55-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-56-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl:57:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-58-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-59-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-60-[Omitted long context line]
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-143-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-144-{"parentUuid":"60e32660-4f05-4149-9364-2dbb43109317","isSidechain":false,"type":"system","subtype":"turn_duration","durationMs":88522,"timestamp":"2026-03-17T10:43:10.704Z","uuid":"93dd92ca-a638-4d5d-9dc5-d2a96d7586e5","isMeta":false,"userType":"external","cwd":"/home/runner/workspace","sessionId":"1bb17dfd-f993-4c71-b540-7d62a1f81b39","version":"2.1.77","gitBranch":"master","slug":"stateless-snuggling-treehouse"}
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-145-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl:146:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-147-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl:148:[Omitted long matching line]
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl:149:[Omitted long matching line]
+.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl:150:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/1bb17dfd-f993-4c71-b540-7d62a1f81b39.jsonl-151-[Omitted long context line]
+--
+/home/runner/workspace/lib/api-zod/src/generated/types/generatedCaptions.ts-9-export interface GeneratedCaptions {
+lib/api-zod/src/generated/types/generatedCaptions.ts-10-  instagram: string;
+lib/api-zod/src/generated/types/generatedCaptions.ts-11-  facebook: string;
+lib/api-zod/src/generated/types/generatedCaptions.ts:12:  substack: string;
+lib/api-zod/src/generated/types/generatedCaptions.ts-13-  x: string;
+lib/api-zod/src/generated/types/generatedCaptions.ts-14-  bluesky: string;
+/home/runner/workspace/lib/api-zod/src/generated/types/generatedCaptions.ts-15-}
+--
+/home/runner/workspace/lib/api-zod/src/generated/types/platformOverrides.ts-10-export interface PlatformOverrides {
+lib/api-zod/src/generated/types/platformOverrides.ts-11-  instagram: PlatformOverride;
+lib/api-zod/src/generated/types/platformOverrides.ts-12-  facebook: PlatformOverride;
+lib/api-zod/src/generated/types/platformOverrides.ts:13:  substack: PlatformOverride;
+lib/api-zod/src/generated/types/platformOverrides.ts-14-  x: PlatformOverride;
+lib/api-zod/src/generated/types/platformOverrides.ts-15-  bluesky: PlatformOverride;
+/home/runner/workspace/lib/api-zod/src/generated/types/platformOverrides.ts-16-}
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/446c4303-7900-4edf-9e5e-d089c3cf155a.jsonl-3-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/446c4303-7900-4edf-9e5e-d089c3cf155a.jsonl-4-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/446c4303-7900-4edf-9e5e-d089c3cf155a.jsonl-5-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/446c4303-7900-4edf-9e5e-d089c3cf155a.jsonl:6:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/446c4303-7900-4edf-9e5e-d089c3cf155a.jsonl-7-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/446c4303-7900-4edf-9e5e-d089c3cf155a.jsonl-8-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/446c4303-7900-4edf-9e5e-d089c3cf155a.jsonl-9-[Omitted long context line]
+--
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl:1:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-2-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-3-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-4-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl:5:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-6-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-7-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-8-[Omitted long context line]
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-41-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-42-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-43-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl:44:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-45-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-46-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-47-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-48-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-49-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl:50:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-51-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-52-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-53-[Omitted long context line]
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-84-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-85-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-86-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl:87:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-88-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-89-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-90-[Omitted long context line]
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-101-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-102-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-103-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl:104:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-105-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-106-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-107-[Omitted long context line]
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-109-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-110-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl-111-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad/subagents/agent-a69fc0ab060431b01.jsonl:112:[Omitted long matching line]
+--
+/home/runner/workspace/lib/api-client-react/src/generated/api.schemas.ts-44-export interface PlatformOverrides {
+lib/api-client-react/src/generated/api.schemas.ts-45-  instagram: PlatformOverride;
+lib/api-client-react/src/generated/api.schemas.ts-46-  facebook: PlatformOverride;
+lib/api-client-react/src/generated/api.schemas.ts:47:  substack: PlatformOverride;
+lib/api-client-react/src/generated/api.schemas.ts-48-  x: PlatformOverride;
+lib/api-client-react/src/generated/api.schemas.ts-49-  bluesky: PlatformOverride;
+/home/runner/workspace/lib/api-client-react/src/generated/api.schemas.ts-50-}
+--
+/home/runner/workspace/lib/api-client-react/src/generated/api.schemas.ts-73-export interface GeneratedCaptions {
+lib/api-client-react/src/generated/api.schemas.ts-74-  instagram: string;
+lib/api-client-react/src/generated/api.schemas.ts-75-  facebook: string;
+lib/api-client-react/src/generated/api.schemas.ts:76:  substack: string;
+lib/api-client-react/src/generated/api.schemas.ts-77-  x: string;
+lib/api-client-react/src/generated/api.schemas.ts-78-  bluesky: string;
+/home/runner/workspace/lib/api-client-react/src/generated/api.schemas.ts-79-}
+--
+lib/api-spec/openapi.yaml-422-          $ref: "#/components/schemas/PlatformOverride"
+lib/api-spec/openapi.yaml-423-        facebook:
+lib/api-spec/openapi.yaml-424-          $ref: "#/components/schemas/PlatformOverride"
+lib/api-spec/openapi.yaml:425:        substack:
+lib/api-spec/openapi.yaml-426-          $ref: "#/components/schemas/PlatformOverride"
+lib/api-spec/openapi.yaml-427-        x:
+lib/api-spec/openapi.yaml-428-          $ref: "#/components/schemas/PlatformOverride"
+--
+lib/api-spec/openapi.yaml-431-      required:
+/home/runner/workspace/lib/api-spec/openapi.yaml-432-        - instagram
+/home/runner/workspace/lib/api-spec/openapi.yaml-433-        - facebook
+lib/api-spec/openapi.yaml:434:        - substack
+/home/runner/workspace/lib/api-spec/openapi.yaml-435-        - x
+/home/runner/workspace/lib/api-spec/openapi.yaml-436-        - bluesky
+/home/runner/workspace/lib/api-spec/openapi.yaml-437-
+--
+lib/api-spec/openapi.yaml-464-          type: string
+lib/api-spec/openapi.yaml-465-        facebook:
+lib/api-spec/openapi.yaml-466-          type: string
+lib/api-spec/openapi.yaml:467:        substack:
+lib/api-spec/openapi.yaml-468-          type: string
+lib/api-spec/openapi.yaml-469-        x:
+lib/api-spec/openapi.yaml-470-          type: string
+--
+lib/api-spec/openapi.yaml-473-      required:
+/home/runner/workspace/lib/api-spec/openapi.yaml-474-        - instagram
+/home/runner/workspace/lib/api-spec/openapi.yaml-475-        - facebook
+lib/api-spec/openapi.yaml:476:        - substack
+/home/runner/workspace/lib/api-spec/openapi.yaml-477-        - x
+/home/runner/workspace/lib/api-spec/openapi.yaml-478-        - bluesky
+/home/runner/workspace/lib/api-spec/openapi.yaml-479-
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-11-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-12-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-13-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:14:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-15-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-16-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-17-[Omitted long context line]
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-19-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-20-{"type":"file-history-snapshot","messageId":"b1ab9365-0e87-4582-bad7-c2569a5a38dd","snapshot":{"messageId":"d10aad96-4efc-4c0b-87dd-49f5db02d4fb","trackedFileBackups":{"artifacts/api-server/src/routes/captions.ts":{"backupFileName":"8050cc114bb02316@v1","version":1,"backupTime":"2026-03-17T09:03:25.214Z"}},"timestamp":"2026-03-17T09:00:15.860Z"},"isSnapshotUpdate":true}
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-21-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:22:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-23-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-24-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-25-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-26-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-27-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-28-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:29:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-30-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-31-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-32-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:33:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-34-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-35-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:36:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-37-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-38-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:39:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-40-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-41-{"parentUuid":"ee1c0932-9fb4-421c-962e-c9c071e9e487","isSidechain":false,"type":"system","subtype":"turn_duration","durationMs":88020,"timestamp":"2026-03-17T09:03:58.183Z","uuid":"eadcac92-d1c7-464f-a09e-712dcbc3af6c","isMeta":false,"userType":"external","cwd":"/home/runner/workspace","sessionId":"03256cd1-a80d-46d9-a2aa-d674155934ad","version":"2.1.77","gitBranch":"master","slug":"deep-percolating-kahn"}
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-42-{"type":"file-history-snapshot","messageId":"98e48a32-29dc-4822-b9b5-32d40e6f88cf","snapshot":{"messageId":"98e48a32-29dc-4822-b9b5-32d40e6f88cf","trackedFileBackups":{"artifacts/api-server/src/routes/captions.ts":{"backupFileName":"8050cc114bb02316@v2","version":2,"backupTime":"2026-03-17T09:08:43.465Z"}},"timestamp":"2026-03-17T09:08:43.433Z"},"isSnapshotUpdate":false}
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-43-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-44-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:45:[Omitted long matching line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:46:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-47-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:48:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-49-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-50-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-51-[Omitted long context line]
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-71-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-72-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-73-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:74:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-75-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-76-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-77-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:78:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-79-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-80-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-81-[Omitted long context line]
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-97-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-98-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-99-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:100:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-101-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-102-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-103-[Omitted long context line]
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-107-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-108-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-109-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:110:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-111-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-112-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-113-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-114-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:115:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-116-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-117-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-118-[Omitted long context line]
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-141-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-142-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-143-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:144:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-145-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-146-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:147:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-148-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-149-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-150-[Omitted long context line]
+--
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-157-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-158-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-159-[Omitted long context line]
+.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl:160:[Omitted long matching line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-161-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-162-[Omitted long context line]
+/home/runner/workspace/.claude-user/projects/-home-runner-workspace/03256cd1-a80d-46d9-a2aa-d674155934ad.jsonl-163-[Omitted long context line]
+--
+.claude-user/history.jsonl-19-{"display":"Yes, the secret anthropic api key is set correctly. I asked the replit agent to make sure that the api is only used to run the app and notin the shell here, maybe that could be a problem. I'll paste you the last message.[Pasted text #2 +18 lines]","pastedContents":{"2":{"id":2,"type":"text","contentHash":"d5051a3bce4292bf"}},"timestamp":1773742812726,"project":"/home/runner/workspace","sessionId":"1bb17dfd-f993-4c71-b540-7d62a1f81b39"}
+.claude-user/history.jsonl-20-{"display":"Add the option to search in the computer for the map to analyze. Now it can only be dragged there.","pastedContents":{},"timestamp":1773743881066,"project":"/home/runner/workspace","sessionId":"1bb17dfd-f993-4c71-b540-7d62a1f81b39"}
+/home/runner/workspace/.claude-user/history.jsonl-21-[Omitted long context line]
+.claude-user/history.jsonl:22:{"display":"As social media please make sure that there is Substack - Post and Substack - Note","pastedContents":{},"timestamp":1773744675345,"project":"/home/runner/workspace","sessionId":"1bb17dfd-f993-4c71-b540-7d62a1f81b39"}
+--
+/home/runner/workspace/artifacts/api-server/src/routes/captions.ts-28-3. Optional context notes from the author
+/home/runner/workspace/artifacts/api-server/src/routes/captions.ts-29-4. Per-platform instructions and audience descriptions
+/home/runner/workspace/artifacts/api-server/src/routes/captions.ts-30-
+artifacts/api-server/src/routes/captions.ts:31:Your task: generate one caption per platform, each optimized for that platform's format, audience, and norms. Return your response as a valid JSON object with keys: instagram, facebook, substack, x, bluesky.`;
+/home/runner/workspace/artifacts/api-server/src/routes/captions.ts-32-
+/home/runner/workspace/artifacts/api-server/src/routes/captions.ts-33-function buildUserPrompt(
+artifacts/api-server/src/routes/captions.ts-34-  mapType: string,
+--
+artifacts/api-server/src/routes/captions.ts-36-  overrides: {
+artifacts/api-server/src/routes/captions.ts-37-    instagram: { instructions: string; audience: string };
+artifacts/api-server/src/routes/captions.ts-38-    facebook: { instructions: string; audience: string };
+artifacts/api-server/src/routes/captions.ts:39:    substack: { instructions: string; audience: string };
+artifacts/api-server/src/routes/captions.ts-40-    x: { instructions: string; audience: string };
+artifacts/api-server/src/routes/captions.ts-41-    bluesky: { instructions: string; audience: string };
+/home/runner/workspace/artifacts/api-server/src/routes/captions.ts-42-  }
+--
+artifacts/api-server/src/routes/captions.ts-57-Audience: ${overrides.facebook.audience}
+artifacts/api-server/src/routes/captions.ts-58-Format: Conversational and informative. Can be slightly longer than Instagram. Hashtags only if relevant.
+/home/runner/workspace/artifacts/api-server/src/routes/captions.ts-59-
+artifacts/api-server/src/routes/captions.ts:60:SUBSTACK
+artifacts/api-server/src/routes/captions.ts:61:Instructions: ${overrides.substack.instructions}
+artifacts/api-server/src/routes/captions.ts:62:Audience: ${overrides.substack.audience}
+artifacts/api-server/src/routes/captions.ts:63:Format: Short introductory paragraph suitable for a Substack newsletter post or note. No hashtags.
+/home/runner/workspace/artifacts/api-server/src/routes/captions.ts-64-
+/home/runner/workspace/artifacts/api-server/src/routes/captions.ts-65-X (TWITTER)
+artifacts/api-server/src/routes/captions.ts-66-Instructions: ${overrides.x.instructions}
+--
+artifacts/api-server/src/routes/captions.ts-192-  const platformFormats: Record<string, string> = {
+artifacts/api-server/src/routes/captions.ts-193-    instagram: "Engaging caption optimized for Instagram. Use line breaks. Include 3–5 hashtags only if highly relevant.",
+artifacts/api-server/src/routes/captions.ts-194-    facebook: "Conversational and informative. Can be slightly longer than Instagram. Hashtags only if relevant.",
+artifacts/api-server/src/routes/captions.ts:195:    substack: "Short introductory paragraph suitable for a Substack newsletter post or note. No hashtags.",
+artifacts/api-server/src/routes/captions.ts-196-    x: "Concise, maximum 280 characters. Punchy. No hashtags unless essential.",
+artifacts/api-server/src/routes/captions.ts-197-    bluesky: "Similar to X but max 300 characters. Thoughtful and direct. Hashtags only if very relevant.",
+/home/runner/workspace/artifacts/api-server/src/routes/captions.ts-198-  };
+--
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-84-For each of the 5 platforms, a settings block with:
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-85-- **Platform-specific instructions** (textarea): free-text instructions for the AI. Examples:
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-86-  - Instagram: "Always include a strong opening hook. Use line breaks for readability."
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt:87:  - Substack: "Write as a short introductory paragraph for a newsletter post. Formal but engaging."
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-88-  - X: "Punchy, max 2 sentences. No hashtags unless very relevant."
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-89-- **Audience description** (textarea): who follows this platform account. Examples:
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-90-  - Instagram: "General public, 25–45, interested in geopolitics and world affairs, visual learners."
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt:91:  - Substack: "Subscribers with deeper interest in history and international relations, expect nuance."
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-92-- **Language** (dropdown): default `English`, but allow selection of other languages (Arabic, French, Spanish, Italian at minimum)
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-93-- Save button per platform (or a global "Save all settings")
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-94-
+--
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-117-3. Optional context notes from the author
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-118-4. Per-platform instructions and audience descriptions
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-119-
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt:120:Your task: generate one caption per platform, each optimized for that platform's format, audience, and norms. Return your response as a valid JSON object with keys: instagram, facebook, substack, x, bluesky.
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-121-```
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-122-
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-123-### 5.2 User Message (constructed per generation)
+--
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-139-Audience: {platform_audience.facebook}
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-140-Format: Conversational and informative. Can be slightly longer than Instagram. Hashtags only if relevant.
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-141-
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt:142:SUBSTACK
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt:143:Instructions: {platform_instructions.substack}
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt:144:Audience: {platform_audience.substack}
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt:145:Format: Short introductory paragraph suitable for a Substack newsletter post or note. No hashtags.
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-146-
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-147-X (TWITTER)
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-148-Instructions: {platform_instructions.x}
+--
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-183-|---|---|---|
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-184-| **Instagram** | Start with a visual hook referencing what the viewer sees. Use line breaks. Keep it engaging and punchy. | Global audience interested in geopolitics, maps, and world affairs. Ages 20–40. |
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-185-| **Facebook** | Write a clear, informative caption. Can include one analytical sentence. Slightly longer than Instagram is fine. | Broader general public, slightly older demographic. Interested in current events and history. |
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt:186:| **Substack** | Write as a short 2–3 sentence intro paragraph for a newsletter post or note. Authoritative but not dry. | Subscribers who follow in-depth geopolitical and historical analysis. Educated, curious readers. |
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-187-| **X (Twitter)** | Be punchy and direct. One strong statement or question. Maximum 280 characters. | Geopolitics enthusiasts, journalists, researchers, policy followers. |
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-188-| **Bluesky** | Thoughtful and direct. Similar to X but slightly more room for nuance. Max 300 characters. | Engaged, intellectually curious audience. Tech-forward, interested in global affairs. |
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-189-
+--
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-195-
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-196-### `platform_settings`
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-197-```
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt:198:platform_id (string): instagram | facebook | substack | x | bluesky
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-199-instructions (text)
+/home/runner/workspace/attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-200-audience (text)
+attached_assets/Pasted--DiploCaption-Product-Requirements-Document-A-private-s_1773735680624.txt-201-language (string, default: "en")
+--
+artifacts/api-server/src/lib/defaultSettings.ts-12-    language: "en",
+/home/runner/workspace/artifacts/api-server/src/lib/defaultSettings.ts-13-  },
+/home/runner/workspace/artifacts/api-server/src/lib/defaultSettings.ts-14-  {
+artifacts/api-server/src/lib/defaultSettings.ts:15:    platformId: "substack",
+artifacts/api-server/src/lib/defaultSettings.ts-16-    instructions: "Write as a short 2–3 sentence intro paragraph for a newsletter post or note. Authoritative but not dry.",
+artifacts/api-server/src/lib/defaultSettings.ts-17-    audience: "Subscribers who follow in-depth geopolitical and historical analysis. Educated, curious readers.",
+artifacts/api-server/src/lib/defaultSettings.ts-18-    language: "en",

@@ -18,7 +18,6 @@ import type {
 
 import type {
   AuthStatus,
-  CreateVariantBody,
   ErrorResponse,
   GenerateCaptionsBody,
   GeneratedCaptions,
@@ -30,8 +29,7 @@ import type {
   RefinedCaption,
   RewriteCaptionBody,
   SaveHistoryBody,
-  UpdatePlatformAudienceBody,
-  UpdateVariantBody,
+  UpdateSettingBody,
   UploadImageBody,
   UploadImageResponse,
 } from "./api.schemas";
@@ -427,91 +425,91 @@ export function useGetSettings<
 }
 
 /**
- * @summary Update audience/language for all variants of a platform
+ * @summary Update platform setting
  */
-export const updatePlatformAudience = async (
+export const getUpdateSettingUrl = (platformId: string) => {
+  return `/api/settings/${platformId}`;
+};
+
+export const updateSetting = async (
   platformId: string,
-  body: UpdatePlatformAudienceBody,
+  updateSettingBody: UpdateSettingBody,
   options?: RequestInit,
-): Promise<{ ok: boolean }> => {
-  return customFetch<{ ok: boolean }>(`/api/settings/${platformId}/audience`, {
+): Promise<PlatformSetting> => {
+  return customFetch<PlatformSetting>(getUpdateSettingUrl(platformId), {
     ...options,
     method: "PUT",
     headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(body),
+    body: JSON.stringify(updateSettingBody),
   });
 };
 
-export const useUpdatePlatformAudience = () =>
-  useMutation({
-    mutationFn: ({ platformId, data }: { platformId: string; data: BodyType<UpdatePlatformAudienceBody> }) =>
-      updatePlatformAudience(platformId, data),
-  });
+export const getUpdateSettingMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateSetting>>,
+    TError,
+    { platformId: string; data: BodyType<UpdateSettingBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateSetting>>,
+  TError,
+  { platformId: string; data: BodyType<UpdateSettingBody> },
+  TContext
+> => {
+  const mutationKey = ["updateSetting"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateSetting>>,
+    { platformId: string; data: BodyType<UpdateSettingBody> }
+  > = (props) => {
+    const { platformId, data } = props ?? {};
+
+    return updateSetting(platformId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateSettingMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateSetting>>
+>;
+export type UpdateSettingMutationBody = BodyType<UpdateSettingBody>;
+export type UpdateSettingMutationError = ErrorType<ErrorResponse>;
 
 /**
- * @summary Update a specific variant's instructions/name
+ * @summary Update platform setting
  */
-export const updateVariant = async (
-  platformId: string,
-  variantName: string,
-  body: UpdateVariantBody,
-  options?: RequestInit,
-): Promise<PlatformSetting> => {
-  return customFetch<PlatformSetting>(`/api/settings/${platformId}/${encodeURIComponent(variantName)}`, {
-    ...options,
-    method: "PUT",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(body),
-  });
+export const useUpdateSetting = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateSetting>>,
+    TError,
+    { platformId: string; data: BodyType<UpdateSettingBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateSetting>>,
+  TError,
+  { platformId: string; data: BodyType<UpdateSettingBody> },
+  TContext
+> => {
+  return useMutation(getUpdateSettingMutationOptions(options));
 };
-
-export const useUpdateVariant = () =>
-  useMutation({
-    mutationFn: ({ platformId, variantName, data }: { platformId: string; variantName: string; data: BodyType<UpdateVariantBody> }) =>
-      updateVariant(platformId, variantName, data),
-  });
-
-/**
- * @summary Add a new variant to a platform
- */
-export const createVariant = async (
-  platformId: string,
-  body: CreateVariantBody,
-  options?: RequestInit,
-): Promise<PlatformSetting> => {
-  return customFetch<PlatformSetting>(`/api/settings/${platformId}`, {
-    ...options,
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(body),
-  });
-};
-
-export const useCreateVariant = () =>
-  useMutation({
-    mutationFn: ({ platformId, data }: { platformId: string; data: BodyType<CreateVariantBody> }) =>
-      createVariant(platformId, data),
-  });
-
-/**
- * @summary Delete a variant
- */
-export const deleteVariant = async (
-  platformId: string,
-  variantName: string,
-  options?: RequestInit,
-): Promise<void> => {
-  return customFetch<void>(`/api/settings/${platformId}/${encodeURIComponent(variantName)}`, {
-    ...options,
-    method: "DELETE",
-  });
-};
-
-export const useDeleteVariant = () =>
-  useMutation({
-    mutationFn: ({ platformId, variantName }: { platformId: string; variantName: string }) =>
-      deleteVariant(platformId, variantName),
-  });
 
 /**
  * @summary Generate captions for all platforms

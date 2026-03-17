@@ -40,7 +40,11 @@ export function createSession(res: Response): void {
 }
 
 export function clearSession(res: Response): void {
-  res.clearCookie(SESSION_COOKIE);
+  res.clearCookie(SESSION_COOKIE, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {

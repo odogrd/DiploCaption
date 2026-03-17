@@ -422,9 +422,7 @@ components:
           $ref: "#/components/schemas/PlatformOverride"
         facebook:
           $ref: "#/components/schemas/PlatformOverride"
-        substack_post:
-          $ref: "#/components/schemas/PlatformOverride"
-        substack_note:
+        substack:
           $ref: "#/components/schemas/PlatformOverride"
         x:
           $ref: "#/components/schemas/PlatformOverride"
@@ -433,8 +431,7 @@ components:
       required:
         - instagram
         - facebook
-        - substack_post
-        - substack_note
+        - substack
         - x
         - bluesky
 
@@ -467,9 +464,7 @@ components:
           type: string
         facebook:
           type: string
-        substack_post:
-          type: string
-        substack_note:
+        substack:
           type: string
         x:
           type: string
@@ -478,8 +473,7 @@ components:
       required:
         - instagram
         - facebook
-        - substack_post
-        - substack_note
+        - substack
         - x
         - bluesky
 

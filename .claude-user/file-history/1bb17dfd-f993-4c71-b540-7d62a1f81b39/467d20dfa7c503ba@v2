@@ -24,45 +24,30 @@ export interface AuthStatus {
 
 export interface PlatformSetting {
   platformId: string;
-  variantName: string;
   instructions: string;
   audience: string;
   language: string;
   updatedAt: string;
 }
 
-export interface UpdatePlatformAudienceBody {
+export interface UpdateSettingBody {
+  instructions: string;
   audience: string;
   language: string;
 }
 
-export interface UpdateVariantBody {
-  variantName: string;
+export interface PlatformOverride {
   instructions: string;
-}
-
-export interface CreateVariantBody {
-  variantName: string;
-  instructions: string;
-}
-
-export interface PlatformVariantOverride {
-  variantName: string;
-  instructions: string;
-}
-
-export interface PlatformOverrideWithVariants {
   audience: string;
-  variants: PlatformVariantOverride[];
 }
 
 export interface PlatformOverrides {
-  instagram: PlatformOverrideWithVariants;
-  facebook: PlatformOverrideWithVariants;
-  substack_post: PlatformOverrideWithVariants;
-  substack_note: PlatformOverrideWithVariants;
-  x: PlatformOverrideWithVariants;
-  bluesky: PlatformOverrideWithVariants;
+  instagram: PlatformOverride;
+  facebook: PlatformOverride;
+  substack_post: PlatformOverride;
+  substack_note: PlatformOverride;
+  x: PlatformOverride;
+  bluesky: PlatformOverride;
 }
 
 export type GenerateCaptionsBodyMapType =
@@ -86,12 +71,14 @@ export interface GenerateCaptionsBody {
   platformOverrides: PlatformOverrides;
 }
 
-export interface CaptionVariantResult {
-  variantName: string;
-  caption: string;
+export interface GeneratedCaptions {
+  instagram: string;
+  facebook: string;
+  substack_post: string;
+  substack_note: string;
+  x: string;
+  bluesky: string;
 }
-
-export type GeneratedCaptions = Record<string, CaptionVariantResult[]>;
 
 export interface RefineCaptionBody {
   platform: string;

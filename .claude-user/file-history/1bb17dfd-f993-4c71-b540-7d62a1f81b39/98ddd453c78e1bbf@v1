@@ -44,11 +44,10 @@ export const GetMeResponse = zod.object({
 });
 
 /**
- * @summary Get all platform settings (flat list of variants)
+ * @summary Get all platform settings
  */
 export const GetSettingsResponseItem = zod.object({
   platformId: zod.string(),
-  variantName: zod.string(),
   instructions: zod.string(),
   audience: zod.string(),
   language: zod.string(),
@@ -57,33 +56,20 @@ export const GetSettingsResponseItem = zod.object({
 export const GetSettingsResponse = zod.array(GetSettingsResponseItem);
 
 /**
- * @summary Update audience/language for all variants of a platform
+ * @summary Update platform setting
  */
-export const UpdatePlatformAudienceParams = zod.object({
+export const UpdateSettingParams = zod.object({
   platformId: zod.coerce.string(),
 });
 
-export const UpdatePlatformAudienceBody = zod.object({
+export const UpdateSettingBody = zod.object({
+  instructions: zod.string(),
   audience: zod.string(),
   language: zod.string(),
 });
 
-/**
- * @summary Update instructions (and optionally rename) a specific variant
- */
-export const UpdateVariantParams = zod.object({
-  platformId: zod.coerce.string(),
-  variantName: zod.coerce.string(),
-});
-
-export const UpdateVariantBody = zod.object({
-  variantName: zod.string(),
-  instructions: zod.string(),
-});
-
-export const UpdateVariantResponse = zod.object({
+export const UpdateSettingResponse = zod.object({
   platformId: zod.string(),
-  variantName: zod.string(),
   instructions: zod.string(),
   audience: zod.string(),
   language: zod.string(),
@@ -91,38 +77,8 @@ export const UpdateVariantResponse = zod.object({
 });
 
 /**
- * @summary Add a new variant to a platform
- */
-export const CreateVariantParams = zod.object({
-  platformId: zod.coerce.string(),
-});
-
-export const CreateVariantBody = zod.object({
-  variantName: zod.string(),
-  instructions: zod.string(),
-});
-
-/**
- * @summary Delete a variant
- */
-export const DeleteVariantParams = zod.object({
-  platformId: zod.coerce.string(),
-  variantName: zod.coerce.string(),
-});
-
-/**
  * @summary Generate captions for all platforms
  */
-const PlatformVariantOverride = zod.object({
-  variantName: zod.string(),
-  instructions: zod.string(),
-});
-
-const PlatformOverrideWithVariants = zod.object({
-  audience: zod.string(),
-  variants: zod.array(PlatformVariantOverride),
-});
-
 export const GenerateCaptionsBody = zod.object({
   imageData: zod.string().describe("Base64-encoded image data"),
   imageMediaType: zod.string().describe("MIME type of the image"),
@@ -134,27 +90,35 @@ export const GenerateCaptionsBody = zod.object({
   ]),
   contextNotes: zod.string().nullish(),
   platformOverrides: zod.object({
-    instagram: PlatformOverrideWithVariants,
-    facebook: PlatformOverrideWithVariants,
-    substack_post: PlatformOverrideWithVariants,
-    substack_note: PlatformOverrideWithVariants,
-    x: PlatformOverrideWithVariants,
-    bluesky: PlatformOverrideWithVariants,
+    instagram: zod.object({
+      instructions: zod.string(),
+      audience: zod.string(),
+    }),
+    facebook: zod.object({
+      instructions: zod.string(),
+      audience: zod.string(),
+    }),
+    substack: zod.object({
+      instructions: zod.string(),
+      audience: zod.string(),
+    }),
+    x: zod.object({
+      instructions: zod.string(),
+      audience: zod.string(),
+    }),
+    bluesky: zod.object({
+      instructions: zod.string(),
+      audience: zod.string(),
+    }),
   }),
 });
 
-const CaptionVariantResult = zod.object({
-  variantName: zod.string(),
-  caption: zod.string(),
-});
-
 export const GenerateCaptionsResponse = zod.object({
-  instagram: zod.array(CaptionVariantResult),
-  facebook: zod.array(CaptionVariantResult),
-  substack_post: zod.array(CaptionVariantResult),
-  substack_note: zod.array(CaptionVariantResult),
-  x: zod.array(CaptionVariantResult),
-  bluesky: zod.array(CaptionVariantResult),
+  instagram: zod.string(),
+  facebook: zod.string(),
+  substack: zod.string(),
+  x: zod.string(),
+  bluesky: zod.string(),
 });
 
 /**
@@ -196,7 +160,13 @@ export const GetHistoryResponseItem = zod.object({
   mapType: zod.string(),
   contextNotes: zod.string().nullish(),
   imageThumbnail: zod.string().nullish(),
-  captions: zod.record(zod.string(), zod.array(CaptionVariantResult)),
+  captions: zod.object({
+    instagram: zod.string(),
+    facebook: zod.string(),
+    substack: zod.string(),
+    x: zod.string(),
+    bluesky: zod.string(),
+  }),
 });
 export const GetHistoryResponse = zod.array(GetHistoryResponseItem);
 
@@ -207,7 +177,13 @@ export const SaveHistoryBody = zod.object({
   mapType: zod.string(),
   contextNotes: zod.string().nullish(),
   imageThumbnail: zod.string().nullish().describe("Base64 thumbnail"),
-  captions: zod.record(zod.string(), zod.array(CaptionVariantResult)),
+  captions: zod.object({
+    instagram: zod.string(),
+    facebook: zod.string(),
+    substack: zod.string(),
+    x: zod.string(),
+    bluesky: zod.string(),
+  }),
 });
 
 /**

@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useGetMe, useLogout } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Compass, Home, Settings, Clock, LogOut, Menu, X, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,6 +10,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [, setLocation] = useLocation();
   const { data: user, isLoading, isError } = useGetMe({ query: { retry: false } });
   const logoutMutation = useLogout();
+  const queryClient = useQueryClient();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location] = useLocation();
 
@@ -30,7 +32,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
-      onSuccess: () => setLocation("/login")
+      onSuccess: () => {
+        queryClient.clear();
+        setLocation("/login");
+      }
     });
   };
 

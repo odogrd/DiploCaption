@@ -1,27 +1,13 @@
 import { cn } from "@/lib/utils";
 
-const PLATFORM_LABELS: Record<string, string> = {
-  instagram: "Instagram",
-  facebook: "Facebook",
-  substack_post: "Substack Post",
-  substack_note: "Substack Note",
-  x: "X",
-  bluesky: "Bluesky",
-};
-
-export function platformLabel(platform: string): string {
-  return PLATFORM_LABELS[platform] ?? platform;
-}
-
 export function PlatformIcon({ platform, className }: { platform: string, className?: string }) {
   const p = platform.toLowerCase();
   let emoji = "📱";
-
+  
   switch(p) {
     case 'instagram': emoji = "📸"; break;
     case 'facebook': emoji = "👥"; break;
-    case 'substack_post': emoji = "📰"; break;
-    case 'substack_note': emoji = "📧"; break;
+    case 'substack': emoji = "📧"; break;
     case 'x': emoji = "𝕏"; break;
     case 'bluesky': emoji = "🦋"; break;
   }
