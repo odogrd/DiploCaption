@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# One-shot: copies all dev platform settings to the production app.
+# Usage: bash sync-settings-to-prod.sh <production-url>
+# Example: bash sync-settings-to-prod.sh https://diplocaption.replit.app
+set -e
+
+PROD_URL="${1%/}"   # strip trailing slash
+
+if [ -z "$PROD_URL" ]; then
+  echo "Usage: bash sync-settings-to-prod.sh <production-url>"
+  echo "Example: bash sync-settings-to-prod.sh https://diplocaption.replit.app"
+  exit 1
+fi
+
+echo "→ Authenticating with $PROD_URL ..."
+COOKIE_JAR=$(mktemp)
+
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+  -X POST "$PROD_URL/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d "{\"username\":\"$APP_USERNAME\",\"password\":\"$APP_PASSWORD\"}" \
+  -c "$COOKIE_JAR")
+
+if [ "$HTTP_STATUS" != "200" ]; then
+  echo "✗ Login failed (HTTP $HTTP_STATUS). Check APP_USERNAME / APP_PASSWORD env vars."
+  rm -f "$COOKIE_JAR"
+  exit 1
+fi
+
+echo "✓ Logged in."
+echo "→ Uploading settings..."
+
+SETTINGS_JSON='[{"platformId":"bluesky","variantName":"Default","instructions":"Thoughtful and direct. Similar to X but slightly more room for nuance. Max 300 characters.","audience":"Engaged, intellectually curious audience. Tech-forward, interested in global affairs.","language":"en"},{"platformId":"facebook","variantName":"Context & Analysis","instructions":"Open with a clear statement of what the map shows. Follow with a short analytical paragraph (3\u20135 sentences) that adds context \u2014 historical background, geopolitical significance, or what makes this map worth paying attention to. End with a question or an invitation to read more. Facebook rewards substance \u2014 don\u2019t be afraid to go deeper than Instagram. Tone: informative, measured, authoritative.","audience":"Adults interested in geopolitics, history, and international affairs. Likely 25\u201355, more diverse in background than Instagram followers. Some are casual news followers, others are more analytically minded. They read past the first line and appreciate context, but still need a clear reason to stop scrolling.","language":"en"},{"platformId":"facebook","variantName":"Discussion Starter","instructions":"Frame the map as the starting point for a broader question or debate. Open with a provocative but factual observation, then pose a clear question that invites followers to share their perspective in the comments. 3\u20134 sentences max. Avoid taking sides \u2014 stay analytically neutral. Facebook\u2019s algorithm rewards comment activity, so make the question genuinely worth answering. Tone: curious, open, engaging.","audience":"Adults interested in geopolitics, history, and international affairs. Likely 25\u201355, more diverse in background than Instagram followers. Some are casual news followers, others are more analytically minded. They read past the first line and appreciate context, but still need a clear reason to stop scrolling.","language":"en"},{"platformId":"facebook","variantName":"Link Driver","instructions":"Write a 2\u20133 sentence teaser that highlights the most interesting insight from the map without giving everything away. The goal is to make the reader want to click through to the Substack post or article for the full analysis. End with a clear CTA: \"Full breakdown at the link.\" Keep it intriguing but not clickbaity. Tone: journalistic, confident.","audience":"Adults interested in geopolitics, history, and international affairs. Likely 25\u201355, more diverse in background than Instagram followers. Some are casual news followers, others are more analytically minded. They read past the first line and appreciate context, but still need a clear reason to stop scrolling.","language":"en"},{"platformId":"instagram","variantName":"Hook & Context","instructions":"Open with a single punchy sentence describing what the map shows \u2014 make it visual and immediate, as this is what appears before the \"more\" cutoff. Follow with 2\u20133 short lines of analytical context explaining why this place, border, or moment matters. Use line breaks to create rhythm and keep it scannable. End with a thought-provoking question to drive comments. Tone: confident, clear, grounded in what the map actually shows. Never sensationalize. Add 5 to 10 relevant hashtags.","audience":"Globally curious readers aged 18\u201340 who follow geopolitics, history, and international affairs. Educated but not specialists \u2014 they want to learn something real in 30 seconds. They engage with and share content that makes them feel informed and intellectually ahead.","language":"en"},{"platformId":"instagram","variantName":"The Sharp Take","instructions":"One or two sentences maximum. Lead with a bold analytical observation that the map makes undeniable. No buildup, no question, no hashtags unless essential. The caption should feel like the smartest thing someone reads today. Tone: precise, confident, understated. Let the map do the heavy lifting. Add 5 to 10 relevant hashtags.","audience":"Global audience interested in geopolitics, maps, and world affairs. Ages 20\u201340.","language":"en"},{"platformId":"instagram","variantName":"The Storyteller","instructions":"Open with a narrative sentence that places the reader in a moment \u2014 a turning point, a tension, a forgotten fact. Build with 3\u20134 short lines that tell the story behind the map, as if opening a short article. Use line breaks. No question needed \u2014 let the story land on its own. Works best for historical maps. Tone: journalistic, immersive, authoritative but never dry. Add 5 to 10 relevant hashtags.","audience":"Globally curious readers aged 18\u201340 who follow geopolitics, history, and international affairs. Educated but not specialists \u2014 they want to learn something real in 30 seconds. They engage with and share content that makes them feel informed and intellectually ahead.","language":"en"},{"platformId":"substack","variantName":"Default","instructions":"Write as a short 2\u20133 sentence intro paragraph for a newsletter post or note. Authoritative but not dry.","audience":"Subscribers who follow in-depth geopolitical and historical analysis. Educated, curious readers.","language":"en"},{"platformId":"substack_note","variantName":"Default","instructions":"Write a punchy 1\u20132 sentence Substack Note. Direct observation or sharp takeaway from the map. No hashtags.","audience":"Subscribers and casual readers who engage with short-form commentary on global affairs.","language":"en"},{"platformId":"substack_post","variantName":"Data & Infographic Maps","instructions":"Write a structured long-form Substack article analyzing what the map shows. Follow this structure:\n\n1. HEADLINE: A clear, descriptive title stating the map'\''s main finding.\n2. OPENING PARAGRAPH: State the central pattern or insight the map reveals in 2\u20133 sentences.\n3. WHAT THE MAP SHOWS: A structured section explaining the data, using bullet points where helpful.\n4. DEEPER ANALYSIS: 2\u20133 paragraphs exploring why this pattern exists.\n5. METHODOLOGY (include only if relevant): Briefly explain how the map was made.\n6. SOURCES: List all data sources.\n\nTone: precise, transparent, intellectually rigorous but accessible.","audience":"Subscribers with a genuine interest in geopolitics, history, cartography, and international affairs. Educated, curious readers who expect analytical depth and intellectual honesty.","language":"en"},{"platformId":"substack_post","variantName":"Style 2","instructions":"Write a structured long-form Substack article analyzing what the map shows. Follow this structure:\n\n1. HEADLINE: A clear, evocative title that frames the geopolitical or historical moment.\n2. OPENING PARAGRAPH: Set the scene in 2\u20133 sentences.\n3. WHAT THE MAP SHOWS: Explain the key visual elements.\n4. HISTORICAL OR GEOPOLITICAL CONTEXT: 3\u20134 paragraphs of analytical depth.\n5. WHY IT MATTERS TODAY (if relevant): A short paragraph connecting to current affairs.\n6. SOURCES: List all sources.\n\nTone: journalistic and authoritative, with narrative clarity.","audience":"Subscribers with a genuine interest in geopolitics, history, cartography, and international affairs. Educated, curious readers who expect analytical depth and intellectual honesty.","language":"en"},{"platformId":"x","variantName":"The One Question","instructions":"Ask the single most interesting question the map raises. Nothing else. Under 280 characters. The question should be specific enough to feel expert, but accessible enough that anyone interested in world affairs wants to answer it. No hashtags. No statement before the question \u2014 just the question itself. Tone: curious, direct, intellectually engaging.","audience":"Geopolitics enthusiasts, journalists, researchers, policy followers.","language":"en"},{"platformId":"x","variantName":"The Reframe","instructions":"Take something the audience thinks they know and reframe it through what the map shows. Start with a tension or contradiction \u2014 \"X is often described as... but this map tells a different story.\" Keep it under 280 characters. No hashtags. The goal is to make the reader see something familiar in a new way. Tone: analytical, quietly provocative, confident.","audience":"Geopolitics enthusiasts, journalists, researchers, policy followers.","language":"en"},{"platformId":"x","variantName":"The Sharp Fact","instructions":"Lead with the single most surprising or important fact the map reveals. One or two sentences, strictly under 280 characters. No preamble, no context-setting \u2014 drop straight into the insight. The map provides the visual context, the caption provides the intellectual punch. No hashtags unless a single highly relevant one fits naturally. Tone: precise, authoritative, understated.","audience":"Geopolitics enthusiasts, journalists, researchers, policy followers.","language":"en"}]'
+
+RESULT=$(curl -s -w "\n%{http_code}" \
+  -X POST "$PROD_URL/api/settings/import" \
+  -H "Content-Type: application/json" \
+  -b "$COOKIE_JAR" \
+  -d "$SETTINGS_JSON")
+
+HTTP_STATUS=$(echo "$RESULT" | tail -1)
+BODY=$(echo "$RESULT" | head -1)
+
+rm -f "$COOKIE_JAR"
+
+if [ "$HTTP_STATUS" = "200" ]; then
+  echo "✓ Done! $BODY"
+else
+  echo "✗ Import failed (HTTP $HTTP_STATUS): $BODY"
+  exit 1
+fi
