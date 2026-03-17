@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Layout } from "@/components/layout";
 import { useDropzone } from "react-dropzone";
 import { UploadCloud, FileImage, Settings2, Sparkles, Download, Save, Loader2, X } from "lucide-react";
-import { compressImage, createThumbnail, formatBytes, cn } from "@/lib/utils";
+import { fileToBase64, createThumbnail, cn } from "@/lib/utils";
 import { useGetSettings, useGenerateCaptions, useRefineCaption, useRewriteCaption, useSaveHistory } from "@workspace/api-client-react";
 import { CaptionCard } from "@/components/caption-card";
 import { PlatformIcon } from "@/components/platform-icon";
@@ -22,8 +22,6 @@ export default function Generator() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [base64Data, setBase64Data] = useState<string | null>(null);
-  const [compressedBytes, setCompressedBytes] = useState<number | null>(null);
-  const [imageMediaType, setImageMediaType] = useState<string>("image/jpeg");
   
   // Input State
   const [mapType, setMapType] = useState<"geopolitical" | "historical" | "data-infographic" | "other">("geopolitical");
@@ -60,13 +58,9 @@ export default function Generator() {
     if (selected) {
       setFile(selected);
       setPreview(URL.createObjectURL(selected));
-      setBase64Data(null);
-      setCompressedBytes(null);
       try {
-        const result = await compressImage(selected);
-        setBase64Data(result.base64);
-        setImageMediaType(result.mediaType);
-        setCompressedBytes(result.compressedBytes);
+        const b64 = await fileToBase64(selected);
+        setBase64Data(b64);
       } catch (e) {
         toast({ variant: "destructive", title: "Error", description: "Failed to process image." });
       }
@@ -87,7 +81,7 @@ export default function Generator() {
       const data = await generateMutation.mutateAsync({
         data: {
           imageData: base64Data,
-          imageMediaType: imageMediaType,
+          imageMediaType: file.type,
           mapType: mapType,
           contextNotes: contextNotes || null,
           platformOverrides: overrides as any
@@ -132,7 +126,7 @@ export default function Generator() {
       const res = await rewriteMutation.mutateAsync({
         data: {
           imageData: base64Data,
-          imageMediaType: imageMediaType,
+          imageMediaType: file.type,
           platform,
           mapType,
           contextNotes: contextNotes || null,
@@ -204,13 +198,9 @@ export default function Generator() {
                     <div className="relative z-10 mt-auto w-full flex items-center justify-between">
                       <div className="flex items-center gap-2 text-white bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10">
                         <FileImage className="w-4 h-4" />
-                        <span className="text-xs font-mono truncate max-w-[120px]">{file?.name}</span>
-                        {compressedBytes != null
-                          ? <span className="text-xs font-mono text-primary/80 shrink-0">{formatBytes(compressedBytes)}</span>
-                          : <Loader2 className="w-3 h-3 animate-spin shrink-0 text-muted-foreground" />
-                        }
+                        <span className="text-xs font-mono truncate max-w-[150px]">{file?.name}</span>
                       </div>
-                      <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); setFile(null); setPreview(null); setBase64Data(null); setCompressedBytes(null); }} className="h-8 px-3 rounded-lg z-20 relative">
+                      <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); setFile(null); setPreview(null); setBase64Data(null); }} className="h-8 px-3 rounded-lg z-20 relative">
                         Change
                       </Button>
                     </div>

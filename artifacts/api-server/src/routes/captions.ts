@@ -90,7 +90,7 @@ router.post("/captions/generate", requireAuth, async (req, res): Promise<void> =
   let response;
   try {
     response = await client.messages.create({
-      model: "claude-3-5-sonnet-20241022",
+      model: "claude-sonnet-4-6",
       max_tokens: 2048,
       system: SYSTEM_PROMPT,
       messages: [
@@ -160,7 +160,7 @@ Rewrite the caption applying the instruction while preserving the factual conten
   let response;
   try {
     response = await client.messages.create({
-      model: "claude-3-5-sonnet-20241022",
+      model: "claude-sonnet-4-6",
       max_tokens: 1024,
       messages: [{ role: "user", content: prompt }],
     });
@@ -213,7 +213,7 @@ Return only the caption text, no explanation.`;
   let response;
   try {
     response = await client.messages.create({
-      model: "claude-3-5-sonnet-20241022",
+      model: "claude-sonnet-4-6",
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
       messages: [
