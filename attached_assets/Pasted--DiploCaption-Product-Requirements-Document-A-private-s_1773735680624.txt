@@ -1,0 +1,257 @@
+# DiploCaption — Product Requirements Document
+> A private, single-user desktop web app built on Replit using Claude Code.
+> Purpose: Upload a finalized DiploMap and instantly generate platform-optimized social media captions using AI vision.
+
+---
+
+## 1. Overview
+
+**App Name:** DiploCaption  
+**User:** Single private user (you). No public registration.  
+**Core flow:** Upload map image → AI analyzes it visually → generates tailored captions for 5 platforms → user edits, refines, or copies.
+
+---
+
+## 2. Tech Stack (Recommended)
+
+Use **Next.js (React + Node.js API routes)** — full-stack in a single Replit project, no separate backend service needed.
+
+- **Frontend:** Next.js + Tailwind CSS
+- **Backend:** Next.js API routes (serverless functions)
+- **AI:** Anthropic Claude API (`claude-sonnet-4-20250514`) with vision (image input)
+- **Auth:** Simple hardcoded single-user login (username + password stored as environment variables), session managed with an HTTP-only cookie or JWT
+- **Storage:** JSON flat files or SQLite (via `better-sqlite3`) for saving platform settings and generation history
+- **Deployment:** Replit (always-on)
+
+---
+
+## 3. Authentication
+
+- Single-user login screen (username + password)
+- Credentials stored as Replit **Secrets** (env variables): `APP_USERNAME`, `APP_PASSWORD`
+- Session persists via HTTP-only cookie (expires after 7 days)
+- All routes protected — redirect to `/login` if unauthenticated
+- No registration, no password reset UI needed for now
+
+---
+
+## 4. App Structure & Pages
+
+### 4.1 `/login`
+- Minimal login form
+- On success → redirect to `/`
+
+### 4.2 `/` — Main Generator (Home)
+The core working screen. Split into three logical areas:
+
+**A. Upload Panel**
+- Drag-and-drop or click-to-upload image (JPG, PNG, WEBP)
+- Image preview shown after upload
+- Optional free-text field: "Additional context or notes" (max 500 chars) — for nuances the AI might miss visually (e.g. "This map shows the 1914 borders of the Ottoman Empire")
+- Map type selector (optional tag): `Geopolitical` | `Historical` | `Data/Infographic` | `Other` — helps steer the AI tone
+
+**B. Per-Session Platform Overrides (collapsible panel)**
+- Shown before generating, collapsed by default
+- Displays the 5 platforms, each with:
+  - A text area pre-filled with the saved global instructions
+  - An audience description field pre-filled with the saved global audience
+  - User can edit these for this session only — changes do NOT save to global settings
+- A "Reset to global defaults" button per platform
+
+**C. Generate Button**
+- Large prominent CTA: "Generate Captions"
+- Shows a loading state with per-platform progress indication if possible
+
+### 4.3 `/results` — Caption Output Screen
+Displayed after generation (can be same page, below the upload panel):
+
+For each of the 5 platforms, show a **card** containing:
+- Platform name + icon
+- Generated caption text (displayed in a styled, readable box)
+- **Edit inline** — clicking the caption text makes it editable directly
+- **Copy** button — copies caption to clipboard, shows "Copied!" confirmation
+- **Refine with AI** — a small text input + "Refine" button. User types a short instruction (e.g. "Be more formal", "Shorten this", "Add more historical context") and AI rewrites the caption keeping the essence but applying the instruction
+- **Rewrite completely** — button that discards the current caption and regenerates from scratch for that platform only
+- A subtle "character count" indicator for platforms with limits (X: 280, Bluesky: 300)
+
+A **"Download all"** button at the top of the results section exports all 5 captions as a `.txt` file, formatted clearly by platform.
+
+A **"Save to History"** button saves this generation session (image thumbnail + all captions + timestamp) to the history log.
+
+### 4.4 `/settings` — Platform Settings
+Accessible from a nav icon (gear). This is where global defaults live.
+
+For each of the 5 platforms, a settings block with:
+- **Platform-specific instructions** (textarea): free-text instructions for the AI. Examples:
+  - Instagram: "Always include a strong opening hook. Use line breaks for readability."
+  - Substack: "Write as a short introductory paragraph for a newsletter post. Formal but engaging."
+  - X: "Punchy, max 2 sentences. No hashtags unless very relevant."
+- **Audience description** (textarea): who follows this platform account. Examples:
+  - Instagram: "General public, 25–45, interested in geopolitics and world affairs, visual learners."
+  - Substack: "Subscribers with deeper interest in history and international relations, expect nuance."
+- **Language** (dropdown): default `English`, but allow selection of other languages (Arabic, French, Spanish, Italian at minimum)
+- Save button per platform (or a global "Save all settings")
+
+### 4.5 `/history` — Generation History
+- List of past generation sessions, sorted newest first
+- Each entry shows: thumbnail of uploaded map, date/time, 5 platform caption previews (truncated)
+- Click to expand and see full captions, re-copy, or re-edit
+- Delete individual entries
+
+---
+
+## 5. AI Prompt Architecture
+
+This is the core intelligence layer. The backend constructs a prompt dynamically for each platform on every generation call.
+
+### 5.1 System Prompt (sent once, applies to all platforms)
+
+```
+You are DiploCaption, an expert social media writer specializing in geopolitical, historical, and diplomatic content. You work for DiploMaps, a media brand that publishes analytical maps about world affairs, history, and international relations.
+
+Your voice is: neutral and journalistic, analytically rigorous, and accessible to educated general audiences. You never sensationalize. You ground captions in facts visible in or implied by the map.
+
+You will receive:
+1. An image of a map
+2. The map type (geopolitical / historical / data-infographic / other)
+3. Optional context notes from the author
+4. Per-platform instructions and audience descriptions
+
+Your task: generate one caption per platform, each optimized for that platform's format, audience, and norms. Return your response as a valid JSON object with keys: instagram, facebook, substack, x, bluesky.
+```
+
+### 5.2 User Message (constructed per generation)
+
+```
+Map type: {map_type}
+
+Author's additional context: {context_notes or "None provided"}
+
+Generate captions for the following platforms:
+
+INSTAGRAM
+Instructions: {platform_instructions.instagram}
+Audience: {platform_audience.instagram}
+Format: Engaging caption optimized for Instagram. Use line breaks. Include 3–5 hashtags only if highly relevant to the content.
+
+FACEBOOK
+Instructions: {platform_instructions.facebook}
+Audience: {platform_audience.facebook}
+Format: Conversational and informative. Can be slightly longer than Instagram. Hashtags only if relevant.
+
+SUBSTACK
+Instructions: {platform_instructions.substack}
+Audience: {platform_audience.substack}
+Format: Short introductory paragraph suitable for a Substack newsletter post or note. No hashtags.
+
+X (TWITTER)
+Instructions: {platform_instructions.x}
+Audience: {platform_audience.x}
+Format: Concise, maximum 280 characters. Punchy. No hashtags unless essential.
+
+BLUESKY
+Instructions: {platform_instructions.bluesky}
+Audience: {platform_audience.bluesky}
+Format: Similar to X but max 300 characters. Thoughtful and direct. Hashtags only if very relevant.
+
+Return only a valid JSON object. No preamble, no markdown formatting, no explanation.
+```
+
+### 5.3 Refinement Prompt (for "Refine with AI")
+
+```
+Here is the current caption for {platform}:
+
+"{current_caption}"
+
+The user's instruction: "{refinement_instruction}"
+
+Rewrite the caption applying the instruction while preserving the factual content, overall structure, and the DiploMaps voice (neutral, analytical, accessible). Return only the new caption text, no explanation.
+```
+
+### 5.4 Full Rewrite Prompt (for "Rewrite completely")
+
+Same as the original generation prompt but scoped to a single platform, with a note: "Generate a fresh, entirely different caption for this platform. Do not reuse phrasing from the previous version."
+
+---
+
+## 6. Default Platform Settings (Pre-loaded on First Run)
+
+These are the starting global defaults. User can edit them in `/settings`.
+
+| Platform | Default Instructions | Default Audience |
+|---|---|---|
+| **Instagram** | Start with a visual hook referencing what the viewer sees. Use line breaks. Keep it engaging and punchy. | Global audience interested in geopolitics, maps, and world affairs. Ages 20–40. |
+| **Facebook** | Write a clear, informative caption. Can include one analytical sentence. Slightly longer than Instagram is fine. | Broader general public, slightly older demographic. Interested in current events and history. |
+| **Substack** | Write as a short 2–3 sentence intro paragraph for a newsletter post or note. Authoritative but not dry. | Subscribers who follow in-depth geopolitical and historical analysis. Educated, curious readers. |
+| **X (Twitter)** | Be punchy and direct. One strong statement or question. Maximum 280 characters. | Geopolitics enthusiasts, journalists, researchers, policy followers. |
+| **Bluesky** | Thoughtful and direct. Similar to X but slightly more room for nuance. Max 300 characters. | Engaged, intellectually curious audience. Tech-forward, interested in global affairs. |
+
+---
+
+## 7. Data Storage Schema
+
+Use SQLite (or JSON files if simpler). Two tables/files:
+
+### `platform_settings`
+```
+platform_id (string): instagram | facebook | substack | x | bluesky
+instructions (text)
+audience (text)
+language (string, default: "en")
+updated_at (timestamp)
+```
+
+### `generation_history`
+```
+id (auto-increment)
+created_at (timestamp)
+map_type (string)
+context_notes (text)
+image_path (string) — saved thumbnail
+captions_json (text) — full JSON of all 5 captions
+```
+
+---
+
+## 8. Environment Variables (Replit Secrets)
+
+```
+APP_USERNAME=         # your login username
+APP_PASSWORD=         # your login password
+SESSION_SECRET=       # random string for signing session cookies
+ANTHROPIC_API_KEY=    # your Claude API key
+```
+
+---
+
+## 9. UI / Design Direction
+
+- **Theme:** Dark, editorial, map-inspired. Think intelligence briefing meets modern dashboard.
+- **Colors:** Deep navy or near-black background, off-white text, muted gold or teal accent
+- **Typography:** A clean geometric sans-serif (e.g. IBM Plex Sans or DM Sans)
+- **Layout:** Single-column focused, wide content area, platform cards in a responsive grid on results
+- **Logo/Header:** "DiploCaption" wordmark + subtle compass or grid icon
+- Keep the UI dense but organized — this is a tool, not a consumer app
+
+---
+
+## 10. Out of Scope (for now)
+
+- Multi-user support
+- Direct posting to social media platforms
+- Scheduling
+- Mobile app
+- Map generation (this app only handles captions)
+
+---
+
+## 11. Build Order (Suggested for Claude Code)
+
+1. **Auth system** — login page, session middleware, protected routes
+2. **Settings page** — platform settings form, save/load from storage
+3. **Upload + generate flow** — image upload, API call to Claude with vision, return JSON
+4. **Results display** — platform cards, copy button, inline editing
+5. **Refine / Rewrite** — secondary AI calls per platform
+6. **History** — save sessions, list view, expand/delete
+7. **Polish** — UI styling, loading states, error handling, character counters
