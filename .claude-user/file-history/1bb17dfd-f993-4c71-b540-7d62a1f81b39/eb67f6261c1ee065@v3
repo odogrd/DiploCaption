@@ -59,13 +59,11 @@ async function runMigrationIfNeeded(): Promise<void> {
 
 async function ensureDefaultSettings(): Promise<void> {
   await runMigrationIfNeeded();
-  // Only seed platforms that have no variants at all — never re-insert deleted ones
-  const existing = await db.select({ platformId: platformSettingsTable.platformId }).from(platformSettingsTable);
-  const seededPlatforms = new Set(existing.map(r => r.platformId));
   for (const setting of DEFAULT_SETTINGS) {
-    if (!seededPlatforms.has(setting.platformId)) {
-      await db.insert(platformSettingsTable).values(setting);
-    }
+    await db
+      .insert(platformSettingsTable)
+      .values(setting)
+      .onConflictDoNothing();
   }
 }
 
