@@ -1,0 +1,238 @@
+import { Router, type IRouter } from "express";
+import Anthropic from "@anthropic-ai/sdk";
+import {
+  GenerateCaptionsBody,
+  GenerateCaptionsResponse,
+  RefineCaptionBody,
+  RefineCaptionResponse,
+  RewriteCaptionBody,
+  RewriteCaptionResponse,
+  UploadImageBody,
+  UploadImageResponse,
+} from "@workspace/api-zod";
+import { requireAuth } from "../lib/auth.js";
+
+const router: IRouter = Router();
+
+function getClient(): Anthropic {
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+}
+
+const SYSTEM_PROMPT = `You are DiploCaption, an expert social media writer specializing in geopolitical, historical, and diplomatic content. You work for DiploMaps, a media brand that publishes analytical maps about world affairs, history, and international relations.
+
+Your voice is: neutral and journalistic, analytically rigorous, and accessible to educated general audiences. You never sensationalize. You ground captions in facts visible in or implied by the map.
+
+You will receive:
+1. An image of a map
+2. The map type (geopolitical / historical / data-infographic / other)
+3. Optional context notes from the author
+4. Per-platform instructions and audience descriptions
+
+Your task: generate one caption per platform, each optimized for that platform's format, audience, and norms. Return your response as a valid JSON object with keys: instagram, facebook, substack, x, bluesky.`;
+
+function buildUserPrompt(
+  mapType: string,
+  contextNotes: string | null | undefined,
+  overrides: {
+    instagram: { instructions: string; audience: string };
+    facebook: { instructions: string; audience: string };
+    substack: { instructions: string; audience: string };
+    x: { instructions: string; audience: string };
+    bluesky: { instructions: string; audience: string };
+  }
+): string {
+  return `Map type: ${mapType}
+
+Author's additional context: ${contextNotes || "None provided"}
+
+Generate captions for the following platforms:
+
+INSTAGRAM
+Instructions: ${overrides.instagram.instructions}
+Audience: ${overrides.instagram.audience}
+Format: Engaging caption optimized for Instagram. Use line breaks. Include 3–5 hashtags only if highly relevant to the content.
+
+FACEBOOK
+Instructions: ${overrides.facebook.instructions}
+Audience: ${overrides.facebook.audience}
+Format: Conversational and informative. Can be slightly longer than Instagram. Hashtags only if relevant.
+
+SUBSTACK
+Instructions: ${overrides.substack.instructions}
+Audience: ${overrides.substack.audience}
+Format: Short introductory paragraph suitable for a Substack newsletter post or note. No hashtags.
+
+X (TWITTER)
+Instructions: ${overrides.x.instructions}
+Audience: ${overrides.x.audience}
+Format: Concise, maximum 280 characters. Punchy. No hashtags unless essential.
+
+BLUESKY
+Instructions: ${overrides.bluesky.instructions}
+Audience: ${overrides.bluesky.audience}
+Format: Similar to X but max 300 characters. Thoughtful and direct. Hashtags only if very relevant.
+
+Return only a valid JSON object. No preamble, no markdown formatting, no explanation.`;
+}
+
+router.post("/captions/generate", requireAuth, async (req, res): Promise<void> => {
+  const parsed = GenerateCaptionsBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const { imageData, imageMediaType, mapType, contextNotes, platformOverrides } = parsed.data;
+
+  const client = getClient();
+  const userPrompt = buildUserPrompt(mapType, contextNotes, platformOverrides);
+
+  const response = await client.messages.create({
+    model: "claude-sonnet-4-20250514",
+    max_tokens: 2048,
+    system: SYSTEM_PROMPT,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "image",
+            source: {
+              type: "base64",
+              media_type: imageMediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+              data: imageData,
+            },
+          },
+          {
+            type: "text",
+            text: userPrompt,
+          },
+        ],
+      },
+    ],
+  });
+
+  const textContent = response.content.find((c) => c.type === "text");
+  if (!textContent || textContent.type !== "text") {
+    res.status(500).json({ error: "No text response from AI" });
+    return;
+  }
+
+  let captions: Record<string, string>;
+  try {
+    const rawText = textContent.text.trim();
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    captions = JSON.parse(jsonMatch ? jsonMatch[0] : rawText);
+  } catch {
+    res.status(500).json({ error: "Failed to parse AI response as JSON" });
+    return;
+  }
+
+  res.json(GenerateCaptionsResponse.parse(captions));
+});
+
+router.post("/captions/refine", requireAuth, async (req, res): Promise<void> => {
+  const parsed = RefineCaptionBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const { platform, currentCaption, instruction } = parsed.data;
+
+  const client = getClient();
+  const prompt = `Here is the current caption for ${platform}:
+
+"${currentCaption}"
+
+The user's instruction: "${instruction}"
+
+Rewrite the caption applying the instruction while preserving the factual content, overall structure, and the DiploMaps voice (neutral, analytical, accessible). Return only the new caption text, no explanation.`;
+
+  const response = await client.messages.create({
+    model: "claude-sonnet-4-20250514",
+    max_tokens: 1024,
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  const textContent = response.content.find((c) => c.type === "text");
+  if (!textContent || textContent.type !== "text") {
+    res.status(500).json({ error: "No text response from AI" });
+    return;
+  }
+
+  res.json(RefineCaptionResponse.parse({ caption: textContent.text.trim() }));
+});
+
+router.post("/captions/rewrite", requireAuth, async (req, res): Promise<void> => {
+  const parsed = RewriteCaptionBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const { imageData, imageMediaType, platform, mapType, contextNotes, instructions, audience } = parsed.data;
+
+  const platformFormats: Record<string, string> = {
+    instagram: "Engaging caption optimized for Instagram. Use line breaks. Include 3–5 hashtags only if highly relevant.",
+    facebook: "Conversational and informative. Can be slightly longer than Instagram. Hashtags only if relevant.",
+    substack: "Short introductory paragraph suitable for a Substack newsletter post or note. No hashtags.",
+    x: "Concise, maximum 280 characters. Punchy. No hashtags unless essential.",
+    bluesky: "Similar to X but max 300 characters. Thoughtful and direct. Hashtags only if very relevant.",
+  };
+
+  const client = getClient();
+  const userPrompt = `Map type: ${mapType}
+
+Author's additional context: ${contextNotes || "None provided"}
+
+Generate a fresh, entirely different caption for ${platform.toUpperCase()}. Do not reuse phrasing from any previous version.
+
+Instructions: ${instructions}
+Audience: ${audience}
+Format: ${platformFormats[platform] || "Platform-appropriate format."}
+
+Return only the caption text, no explanation.`;
+
+  const response = await client.messages.create({
+    model: "claude-sonnet-4-20250514",
+    max_tokens: 1024,
+    system: SYSTEM_PROMPT,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "image",
+            source: {
+              type: "base64",
+              media_type: imageMediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+              data: imageData,
+            },
+          },
+          { type: "text", text: userPrompt },
+        ],
+      },
+    ],
+  });
+
+  const textContent = response.content.find((c) => c.type === "text");
+  if (!textContent || textContent.type !== "text") {
+    res.status(500).json({ error: "No text response from AI" });
+    return;
+  }
+
+  res.json(RewriteCaptionResponse.parse({ caption: textContent.text.trim() }));
+});
+
+router.post("/images/upload", requireAuth, async (req, res): Promise<void> => {
+  const parsed = UploadImageBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+  const imageKey = `img_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  res.json(UploadImageResponse.parse({ imageKey }));
+});
+
+export default router;
