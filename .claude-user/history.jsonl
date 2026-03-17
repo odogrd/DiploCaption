@@ -30,3 +30,5 @@
 {"display":"When there are 4 styles, one of them being the default one, when I delete the default one, it comes back recreated. Is there somewhere where it is compulsaory to have the default style?","pastedContents":{},"timestamp":1773747250439,"project":"/home/runner/workspace","sessionId":"1bb17dfd-f993-4c71-b540-7d62a1f81b39"}
 {"display":"I stopped it, but cannot make it restart","pastedContents":{},"timestamp":1773748002700,"project":"/home/runner/workspace","sessionId":"1bb17dfd-f993-4c71-b540-7d62a1f81b39"}
 {"display":"pnpm --filter api-server dev","pastedContents":{},"timestamp":1773748070232,"project":"/home/runner/workspace","sessionId":"1bb17dfd-f993-4c71-b540-7d62a1f81b39"}
+{"display":"Make sure that the writing styles's boxes are expandable, so that I can see the whole prompt when I want to edit it","pastedContents":{},"timestamp":1773749622251,"project":"/home/runner/workspace","sessionId":"1bb17dfd-f993-4c71-b540-7d62a1f81b39"}
+{"display":"When I save it, it should go back to the original compact size","pastedContents":{},"timestamp":1773749664746,"project":"/home/runner/workspace","sessionId":"1bb17dfd-f993-4c71-b540-7d62a1f81b39"}

@@ -246,9 +246,6 @@ export default function Settings() {
                           e.target.style.height = "auto";
                           e.target.style.height = `${e.target.scrollHeight}px`;
                         }}
-                        onBlur={(e) => {
-                          if (!v.isDirty) e.target.style.height = "";
-                        }}
                         rows={3}
                         className="w-full bg-black/20 border border-white/5 rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary/50 resize-y font-sans overflow-hidden"
                         placeholder="Writing instructions for this style..."
