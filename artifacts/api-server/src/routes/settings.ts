@@ -114,6 +114,33 @@ router.put("/settings/:platformId/:variantName", requireAuth, async (req, res): 
   res.json(UpdateVariantResponse.parse(updated));
 });
 
+// POST /settings/import — bulk upsert all settings (one-shot sync from another environment)
+// Must be registered BEFORE POST /settings/:platformId to avoid "import" matching as a platformId
+router.post("/settings/import", requireAuth, async (req, res): Promise<void> => {
+  const rows = req.body;
+  if (!Array.isArray(rows)) {
+    res.status(400).json({ error: "Expected an array of settings" });
+    return;
+  }
+  await runMigrationIfNeeded();
+  let count = 0;
+  for (const row of rows) {
+    if (!row.platformId || !row.variantName || !row.instructions || !row.audience) continue;
+    await pool.query(
+      `INSERT INTO platform_settings (platform_id, variant_name, instructions, audience, language, updated_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())
+       ON CONFLICT (platform_id, variant_name)
+       DO UPDATE SET instructions = EXCLUDED.instructions,
+                     audience = EXCLUDED.audience,
+                     language = EXCLUDED.language,
+                     updated_at = NOW()`,
+      [row.platformId, row.variantName, row.instructions, row.audience, row.language ?? "en"]
+    );
+    count++;
+  }
+  res.json({ ok: true, upserted: count });
+});
+
 // POST /settings/:platformId — add a new variant
 router.post("/settings/:platformId", requireAuth, async (req, res): Promise<void> => {
   const params = CreateVariantParams.safeParse(req.params);
@@ -143,32 +170,6 @@ router.post("/settings/:platformId", requireAuth, async (req, res): Promise<void
     .returning();
 
   res.status(201).json(UpdateVariantResponse.parse(created));
-});
-
-// POST /settings/import — bulk upsert all settings (one-shot sync from another environment)
-router.post("/settings/import", requireAuth, async (req, res): Promise<void> => {
-  const rows = req.body;
-  if (!Array.isArray(rows)) {
-    res.status(400).json({ error: "Expected an array of settings" });
-    return;
-  }
-  await runMigrationIfNeeded();
-  let count = 0;
-  for (const row of rows) {
-    if (!row.platformId || !row.variantName || !row.instructions || !row.audience) continue;
-    await pool.query(
-      `INSERT INTO platform_settings (platform_id, variant_name, instructions, audience, language, updated_at)
-       VALUES ($1, $2, $3, $4, $5, NOW())
-       ON CONFLICT (platform_id, variant_name)
-       DO UPDATE SET instructions = EXCLUDED.instructions,
-                     audience = EXCLUDED.audience,
-                     language = EXCLUDED.language,
-                     updated_at = NOW()`,
-      [row.platformId, row.variantName, row.instructions, row.audience, row.language ?? "en"]
-    );
-    count++;
-  }
-  res.json({ ok: true, upserted: count });
 });
 
 // DELETE /settings/:platformId/:variantName — delete a variant (must keep at least one)
