@@ -1,0 +1,277 @@
+import { useState, useEffect } from "react";
+import { Layout } from "@/components/layout";
+import {
+  useGetSettings,
+  useUpdatePlatformAudience,
+  useUpdateVariant,
+  useCreateVariant,
+  useDeleteVariant,
+} from "@workspace/api-client-react";
+import { PlatformIcon, platformLabel } from "@/components/platform-icon";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, Save, Plus, Trash2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { useQueryClient } from "@tanstack/react-query";
+
+const PLATFORM_ORDER = ["instagram", "facebook", "substack_post", "substack_note", "x", "bluesky"];
+
+type VariantLocal = { variantName: string; instructions: string; isDirty: boolean; originalName: string };
+type PlatformLocal = { audience: string; language: string; audienceDirty: boolean; variants: VariantLocal[] };
+
+export default function Settings() {
+  const { data: settings, isLoading } = useGetSettings();
+  const updateAudienceMutation = useUpdatePlatformAudience();
+  const updateVariantMutation = useUpdateVariant();
+  const createVariantMutation = useCreateVariant();
+  const deleteVariantMutation = useDeleteVariant();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const [local, setLocal] = useState<Record<string, PlatformLocal>>({});
+  const [saving, setSaving] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!settings) return;
+    const grouped: Record<string, PlatformLocal> = {};
+    for (const s of settings) {
+      if (!grouped[s.platformId]) {
+        grouped[s.platformId] = { audience: s.audience, language: s.language, audienceDirty: false, variants: [] };
+      }
+      grouped[s.platformId].variants.push({ variantName: s.variantName, instructions: s.instructions, isDirty: false, originalName: s.variantName });
+    }
+    setLocal(grouped);
+  }, [settings]);
+
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["/api/settings"] });
+
+  const setAudience = (pid: string, value: string) =>
+    setLocal(prev => ({ ...prev, [pid]: { ...prev[pid], audience: value, audienceDirty: true } }));
+
+  const setLanguage = (pid: string, value: string) =>
+    setLocal(prev => ({ ...prev, [pid]: { ...prev[pid], language: value, audienceDirty: true } }));
+
+  const setVariantField = (pid: string, idx: number, field: "variantName" | "instructions", value: string) =>
+    setLocal(prev => {
+      const variants = [...prev[pid].variants];
+      variants[idx] = { ...variants[idx], [field]: value, isDirty: true };
+      return { ...prev, [pid]: { ...prev[pid], variants } };
+    });
+
+  const handleSaveAudience = async (pid: string) => {
+    setSaving(`${pid}_audience`);
+    try {
+      await updateAudienceMutation.mutateAsync({ platformId: pid, data: { audience: local[pid].audience, language: local[pid].language } });
+      setLocal(prev => ({ ...prev, [pid]: { ...prev[pid], audienceDirty: false } }));
+      toast({ title: "Saved", description: `${platformLabel(pid)} audience updated.` });
+      refresh();
+    } catch {
+      toast({ variant: "destructive", title: "Error", description: "Failed to save." });
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const handleSaveVariant = async (pid: string, idx: number) => {
+    setSaving(`${pid}_${idx}`);
+    try {
+      const v = local[pid].variants[idx];
+      await updateVariantMutation.mutateAsync({ platformId: pid, variantName: v.originalName, data: { variantName: v.variantName, instructions: v.instructions } });
+      const variants = [...local[pid].variants];
+      variants[idx] = { ...variants[idx], isDirty: false, originalName: v.variantName };
+      setLocal(prev => ({ ...prev, [pid]: { ...prev[pid], variants } }));
+      toast({ title: "Saved", description: `"${v.variantName}" style saved.` });
+      refresh();
+    } catch {
+      toast({ variant: "destructive", title: "Error", description: "Failed to save." });
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const handleAddVariant = async (pid: string) => {
+    setSaving(`${pid}_add`);
+    try {
+      const name = `Style ${(local[pid]?.variants.length ?? 0) + 1}`;
+      await createVariantMutation.mutateAsync({ platformId: pid, data: { variantName: name, instructions: "" } });
+      toast({ title: "Added", description: `New style variant added to ${platformLabel(pid)}.` });
+      refresh();
+    } catch {
+      toast({ variant: "destructive", title: "Error", description: "Failed to add variant." });
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const handleDeleteVariant = async (pid: string, variantName: string) => {
+    setSaving(`${pid}_del_${variantName}`); // variantName here is already the originalName
+    try {
+      await deleteVariantMutation.mutateAsync({ platformId: pid, variantName });
+      toast({ title: "Deleted", description: `"${variantName}" style removed.` });
+      refresh();
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Error", description: e?.message ?? "Failed to delete." });
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        </div>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <div className="mb-10">
+        <h1 className="text-4xl font-serif font-bold text-foreground mb-4">Platform Configuration</h1>
+        <p className="text-muted-foreground text-lg max-w-2xl">
+          Set the audience and language for each platform, then define one or more writing style variants. Each variant generates a separate caption.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {PLATFORM_ORDER.map((pid, idx) => {
+          const config = local[pid];
+          if (!config) return null;
+
+          return (
+            <motion.div
+              key={pid}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.07 }}
+              className="glass-panel rounded-2xl p-6 md:p-8 flex flex-col gap-6"
+            >
+              {/* Platform header */}
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                <PlatformIcon platform={pid} className="text-2xl" />
+                <h2 className="text-xl font-serif font-bold">{platformLabel(pid)}</h2>
+              </div>
+
+              {/* Audience + Language (shared across all variants) */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                    Target Audience
+                  </label>
+                  <select
+                    value={config.language}
+                    onChange={(e) => setLanguage(pid, e.target.value)}
+                    className="bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-primary"
+                  >
+                    <option value="en">English</option>
+                    <option value="ar">Arabic</option>
+                    <option value="fr">French</option>
+                    <option value="es">Spanish</option>
+                    <option value="it">Italian</option>
+                  </select>
+                </div>
+                <input
+                  type="text"
+                  value={config.audience}
+                  onChange={(e) => setAudience(pid, e.target.value)}
+                  className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-primary/50 font-sans"
+                  placeholder="E.g., Policy makers, general public..."
+                />
+                {config.audienceDirty && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2 border-white/10 hover:bg-white/5 text-xs"
+                    disabled={saving === `${pid}_audience`}
+                    onClick={() => handleSaveAudience(pid)}
+                  >
+                    {saving === `${pid}_audience` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                    Save Audience
+                  </Button>
+                )}
+              </div>
+
+              {/* Style Variants */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                    Writing Styles
+                  </label>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="gap-1.5 text-xs text-primary hover:text-primary/80 hover:bg-transparent px-0"
+                    disabled={saving === `${pid}_add`}
+                    onClick={() => handleAddVariant(pid)}
+                  >
+                    {saving === `${pid}_add` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                    Add style
+                  </Button>
+                </div>
+
+                {config.variants.map((v, i) => {
+                  const isSaving = saving === `${pid}_${i}`;
+                  const isDeleting = saving === `${pid}_del_${v.originalName}`;
+
+                  return (
+                    <div key={i} className="bg-white/[0.03] border border-white/5 rounded-xl p-4 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <input
+                          value={v.variantName}
+                          onChange={(e) => setVariantField(pid, i, "variantName", e.target.value)}
+                          className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-sm font-semibold text-foreground focus:outline-none focus:border-primary/50"
+                          placeholder="Style name (e.g. Formal, Punchy...)"
+                        />
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="w-8 h-8 text-muted-foreground hover:text-destructive"
+                          disabled={isDeleting || config.variants.length <= 1}
+                          title={config.variants.length <= 1 ? "Add another style before deleting this one" : "Delete this style"}
+                          onClick={() => handleDeleteVariant(pid, v.originalName)}
+                        >
+                          {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                        </Button>
+                      </div>
+                      <textarea
+                        value={v.instructions}
+                        onChange={(e) => {
+                          setVariantField(pid, i, "instructions", e.target.value);
+                          e.target.style.height = "auto";
+                          e.target.style.height = `${e.target.scrollHeight}px`;
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.height = "auto";
+                          e.target.style.height = `${e.target.scrollHeight}px`;
+                        }}
+                        onBlur={(e) => {
+                          if (!v.isDirty) e.target.style.height = "";
+                        }}
+                        rows={3}
+                        className="w-full bg-black/20 border border-white/5 rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary/50 resize-y font-sans overflow-hidden"
+                        placeholder="Writing instructions for this style..."
+                      />
+                      {v.isDirty && (
+                        <Button
+                          size="sm"
+                          className="gap-2 w-full text-xs"
+                          disabled={isSaving}
+                          onClick={() => handleSaveVariant(pid, i)}
+                        >
+                          {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                          Save "{v.variantName}"
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </Layout>
+  );
+}
