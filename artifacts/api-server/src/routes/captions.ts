@@ -90,7 +90,7 @@ router.post("/captions/generate", requireAuth, async (req, res): Promise<void> =
   let response;
   try {
     response = await client.messages.create({
-      model: "claude-sonnet-4-6",
+      model: "claude-3-5-sonnet-20241022",
       max_tokens: 2048,
       system: SYSTEM_PROMPT,
       messages: [
@@ -114,7 +114,9 @@ router.post("/captions/generate", requireAuth, async (req, res): Promise<void> =
       ],
     });
   } catch (e) {
-    res.status(500).json({ error: "AI service error" });
+    console.error("[captions/generate] Anthropic API error:", e);
+    const message = e instanceof Error ? e.message : "Unknown error";
+    res.status(500).json({ error: "AI service error", detail: message });
     return;
   }
 
@@ -158,12 +160,14 @@ Rewrite the caption applying the instruction while preserving the factual conten
   let response;
   try {
     response = await client.messages.create({
-      model: "claude-sonnet-4-6",
+      model: "claude-3-5-sonnet-20241022",
       max_tokens: 1024,
       messages: [{ role: "user", content: prompt }],
     });
   } catch (e) {
-    res.status(500).json({ error: "AI service error" });
+    console.error("[captions/refine] Anthropic API error:", e);
+    const message = e instanceof Error ? e.message : "Unknown error";
+    res.status(500).json({ error: "AI service error", detail: message });
     return;
   }
 
@@ -209,7 +213,7 @@ Return only the caption text, no explanation.`;
   let response;
   try {
     response = await client.messages.create({
-      model: "claude-sonnet-4-6",
+      model: "claude-3-5-sonnet-20241022",
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
       messages: [
@@ -230,7 +234,9 @@ Return only the caption text, no explanation.`;
       ],
     });
   } catch (e) {
-    res.status(500).json({ error: "AI service error" });
+    console.error("[captions/rewrite] Anthropic API error:", e);
+    const message = e instanceof Error ? e.message : "Unknown error";
+    res.status(500).json({ error: "AI service error", detail: message });
     return;
   }
 
