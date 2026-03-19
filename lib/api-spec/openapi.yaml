@@ -374,6 +374,8 @@ components:
       properties:
         platformId:
           type: string
+        variantName:
+          type: string
         instructions:
           type: string
         audience:
@@ -385,6 +387,7 @@ components:
           format: date-time
       required:
         - platformId
+        - variantName
         - instructions
         - audience
         - language
@@ -404,16 +407,29 @@ components:
         - audience
         - language
 
+    PlatformVariantOverride:
+      type: object
+      properties:
+        variantName:
+          type: string
+        instructions:
+          type: string
+      required:
+        - variantName
+        - instructions
+
     PlatformOverride:
       type: object
       properties:
-        instructions:
-          type: string
         audience:
           type: string
+        variants:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlatformVariantOverride"
       required:
-        - instructions
         - audience
+        - variants
 
     PlatformOverrides:
       type: object
@@ -430,13 +446,6 @@ components:
           $ref: "#/components/schemas/PlatformOverride"
         bluesky:
           $ref: "#/components/schemas/PlatformOverride"
-      required:
-        - instagram
-        - facebook
-        - substack_post
-        - substack_note
-        - x
-        - bluesky
 
     GenerateCaptionsBody:
       type: object
@@ -460,28 +469,44 @@ components:
         - mapType
         - platformOverrides
 
+    CaptionVariantResult:
+      type: object
+      properties:
+        variantName:
+          type: string
+        caption:
+          type: string
+      required:
+        - variantName
+        - caption
+
     GeneratedCaptions:
       type: object
       properties:
         instagram:
-          type: string
+          type: array
+          items:
+            $ref: "#/components/schemas/CaptionVariantResult"
         facebook:
-          type: string
+          type: array
+          items:
+            $ref: "#/components/schemas/CaptionVariantResult"
         substack_post:
-          type: string
+          type: array
+          items:
+            $ref: "#/components/schemas/CaptionVariantResult"
         substack_note:
-          type: string
+          type: array
+          items:
+            $ref: "#/components/schemas/CaptionVariantResult"
         x:
-          type: string
+          type: array
+          items:
+            $ref: "#/components/schemas/CaptionVariantResult"
         bluesky:
-          type: string
-      required:
-        - instagram
-        - facebook
-        - substack_post
-        - substack_note
-        - x
-        - bluesky
+          type: array
+          items:
+            $ref: "#/components/schemas/CaptionVariantResult"
 
     RefineCaptionBody:
       type: object

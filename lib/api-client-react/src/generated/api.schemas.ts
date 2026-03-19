@@ -57,12 +57,12 @@ export interface PlatformOverrideWithVariants {
 }
 
 export interface PlatformOverrides {
-  instagram: PlatformOverrideWithVariants;
-  facebook: PlatformOverrideWithVariants;
-  substack_post: PlatformOverrideWithVariants;
-  substack_note: PlatformOverrideWithVariants;
-  x: PlatformOverrideWithVariants;
-  bluesky: PlatformOverrideWithVariants;
+  instagram?: PlatformOverrideWithVariants;
+  facebook?: PlatformOverrideWithVariants;
+  substack_post?: PlatformOverrideWithVariants;
+  substack_note?: PlatformOverrideWithVariants;
+  x?: PlatformOverrideWithVariants;
+  bluesky?: PlatformOverrideWithVariants;
 }
 
 export type GenerateCaptionsBodyMapType =
@@ -83,7 +83,7 @@ export interface GenerateCaptionsBody {
   mapType: GenerateCaptionsBodyMapType;
   /** @nullable */
   contextNotes?: string | null;
-  platformOverrides: PlatformOverrides;
+  platformOverrides: Partial<PlatformOverrides>;
 }
 
 export interface CaptionVariantResult {
