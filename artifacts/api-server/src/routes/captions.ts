@@ -15,7 +15,7 @@ import { requireAuth } from "../lib/auth.js";
 const router: IRouter = Router();
 
 function getClient(): Anthropic {
-  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  return new Anthropic({ apiKey: process.env.DIPLO_ANTHROPIC_KEY });
 }
 
 const SYSTEM_PROMPT = `You are DiploCaption, an expert social media writer specializing in geopolitical, historical, and diplomatic content. You work for DiploMaps, a media brand that publishes analytical maps about world affairs, history, and international relations.
