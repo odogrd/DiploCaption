@@ -101,10 +101,10 @@ export default function Generator() {
           imageMediaType,
           mapType,
           contextNotes: contextNotes || null,
-          platformOverrides: filteredOverrides as any,
+          platformOverrides: filteredOverrides,
         },
       });
-      setResults(data as any);
+      setResults(data);
       toast({ title: "Analysis Complete", description: "Captions generated successfully." });
     } catch {
       toast({ variant: "destructive", title: "Generation Failed", description: "Could not generate captions. Please try again." });

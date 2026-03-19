@@ -52,7 +52,7 @@ export const GetSettingsResponseItem = zod.object({
   instructions: zod.string(),
   audience: zod.string(),
   language: zod.string(),
-  updatedAt: zod.date(),
+  updatedAt: zod.coerce.date(),
 });
 export const GetSettingsResponse = zod.array(GetSettingsResponseItem);
 
@@ -87,7 +87,7 @@ export const UpdateVariantResponse = zod.object({
   instructions: zod.string(),
   audience: zod.string(),
   language: zod.string(),
-  updatedAt: zod.date(),
+  updatedAt: zod.coerce.date(),
 });
 
 /**
@@ -134,12 +134,12 @@ export const GenerateCaptionsBody = zod.object({
   ]),
   contextNotes: zod.string().nullish(),
   platformOverrides: zod.object({
-    instagram: PlatformOverrideWithVariants,
-    facebook: PlatformOverrideWithVariants,
-    substack_post: PlatformOverrideWithVariants,
-    substack_note: PlatformOverrideWithVariants,
-    x: PlatformOverrideWithVariants,
-    bluesky: PlatformOverrideWithVariants,
+    instagram: PlatformOverrideWithVariants.optional(),
+    facebook: PlatformOverrideWithVariants.optional(),
+    substack_post: PlatformOverrideWithVariants.optional(),
+    substack_note: PlatformOverrideWithVariants.optional(),
+    x: PlatformOverrideWithVariants.optional(),
+    bluesky: PlatformOverrideWithVariants.optional(),
   }),
 });
 
@@ -149,12 +149,12 @@ const CaptionVariantResult = zod.object({
 });
 
 export const GenerateCaptionsResponse = zod.object({
-  instagram: zod.array(CaptionVariantResult),
-  facebook: zod.array(CaptionVariantResult),
-  substack_post: zod.array(CaptionVariantResult),
-  substack_note: zod.array(CaptionVariantResult),
-  x: zod.array(CaptionVariantResult),
-  bluesky: zod.array(CaptionVariantResult),
+  instagram: zod.array(CaptionVariantResult).optional(),
+  facebook: zod.array(CaptionVariantResult).optional(),
+  substack_post: zod.array(CaptionVariantResult).optional(),
+  substack_note: zod.array(CaptionVariantResult).optional(),
+  x: zod.array(CaptionVariantResult).optional(),
+  bluesky: zod.array(CaptionVariantResult).optional(),
 });
 
 /**
@@ -192,7 +192,7 @@ export const RewriteCaptionResponse = zod.object({
  */
 export const GetHistoryResponseItem = zod.object({
   id: zod.number(),
-  createdAt: zod.date(),
+  createdAt: zod.coerce.date(),
   mapType: zod.string(),
   contextNotes: zod.string().nullish(),
   imageThumbnail: zod.string().nullish(),
