@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Wrapper: strip ANTHROPIC_API_KEY so `claude` in the shell uses the
+# claude.ai subscription instead of the app's API key.
+#
+# Finds the highest-version binary in the versions directory automatically,
+# so this survives Claude Code auto-updates without any manual changes.
+#
+# This file lives in scripts/bin/ which is committed to git and prepended
+# to PATH in .replit — the most durable location possible.
+
+VERSIONS_DIR="/home/runner/workspace/.local/share/claude/versions"
+
+if [ ! -d "$VERSIONS_DIR" ]; then
+  echo "claude: versions directory not found at $VERSIONS_DIR" >&2
+  exit 1
+fi
+
+_real=$(ls "$VERSIONS_DIR" | sort -V | tail -1)
+_real="$VERSIONS_DIR/$_real"
+
+if [ ! -x "$_real" ]; then
+  echo "claude: no executable found in $VERSIONS_DIR" >&2
+  exit 1
+fi
+
+exec env -u ANTHROPIC_API_KEY "$_real" "$@"
