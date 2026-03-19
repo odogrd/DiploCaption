@@ -1,5 +1,5 @@
 {
-  "numStartups": 11,
+  "numStartups": 12,
   "installMethod": "native",
   "autoUpdates": false,
   "customApiKeyResponses": {
@@ -31,7 +31,9 @@
     "custom-agents": 6,
     "agent-flag": 6,
     "feedback-command": 6,
-    "frontend-design-plugin": 10
+    "frontend-design-plugin": 10,
+    "permissions": 12,
+    "rename-conversation": 12
   },
   "promptQueueUseCount": 1,
   "cachedGrowthBookFeatures": {
@@ -380,5 +382,10 @@
       "timestamp": 1773889102364
     }
   },
-  "cachedExtraUsageDisabledReason": "org_level_disabled"
+  "cachedExtraUsageDisabledReason": "org_level_disabled",
+  "githubRepoPaths": {
+    "odogrd/diplocaption": [
+      "/home/runner/workspace"
+    ]
+  }
 }

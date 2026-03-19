@@ -36,7 +36,7 @@ export default function Generator() {
   const [contextNotes, setContextNotes] = useState("");
 
   // Platform selection — which platforms to generate for
-  const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set(PLATFORM_ORDER));
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set());
 
   // Overrides State — per-platform, with audience + variant array
   const [overrides, setOverrides] = useState<Record<string, PlatformOverride>>({});
