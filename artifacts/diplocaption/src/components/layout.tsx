@@ -1,10 +1,11 @@
 import { Link, useLocation } from "wouter";
 import { useGetMe, useLogout } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Compass, Home, Settings, Clock, LogOut, Menu, X, Loader2 } from "lucide-react";
+import { Compass, Home, Settings, Clock, LogOut, Menu, X, Loader2, Sun, Moon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/hooks/use-theme";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [, setLocation] = useLocation();
@@ -13,6 +14,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location] = useLocation();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     if (!isLoading && (isError || !user?.authenticated)) {
@@ -66,9 +68,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
-                  isActive 
-                    ? "bg-primary/10 text-primary font-medium" 
-                    : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                  isActive
+                    ? "bg-primary/10 text-primary font-medium"
+                    : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
                 )}
               >
                 <Icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive ? "text-primary" : "")} />
@@ -78,8 +80,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-border">
-          <button 
+        <div className="p-4 border-t border-border space-y-1">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-3 px-4 py-3 w-full text-left rounded-xl text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-colors"
+          >
+            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+          </button>
+          <button
             onClick={handleLogout}
             disabled={logoutMutation.isPending}
             className="flex items-center gap-3 px-4 py-3 w-full text-left rounded-xl text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors group"
@@ -134,9 +143,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   </Link>
                 );
               })}
-              <button 
+              <button
+                onClick={toggleTheme}
+                className="flex items-center gap-4 px-4 py-4 w-full text-left rounded-xl text-muted-foreground text-lg mt-8"
+              >
+                {theme === "dark" ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+                {theme === "dark" ? "Light Mode" : "Dark Mode"}
+              </button>
+              <button
                 onClick={handleLogout}
-                className="flex items-center gap-4 px-4 py-4 w-full text-left rounded-xl text-destructive text-lg mt-8"
+                className="flex items-center gap-4 px-4 py-4 w-full text-left rounded-xl text-destructive text-lg"
               >
                 <LogOut className="w-6 h-6" />
                 Logout

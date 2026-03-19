@@ -1,5 +1,5 @@
 {
-  "numStartups": 9,
+  "numStartups": 10,
   "installMethod": "native",
   "autoUpdates": false,
   "customApiKeyResponses": {
@@ -15,7 +15,7 @@
     "memory-command": 3,
     "theme-command": 3,
     "status-line": 3,
-    "prompt-queue": 3,
+    "prompt-queue": 10,
     "enter-to-steer-in-relatime": 3,
     "todo-list": 3,
     "install-github-app": 3,
@@ -30,7 +30,8 @@
     "mobile-app": 4,
     "custom-agents": 6,
     "agent-flag": 6,
-    "feedback-command": 6
+    "feedback-command": 6,
+    "frontend-design-plugin": 10
   },
   "promptQueueUseCount": 1,
   "cachedGrowthBookFeatures": {

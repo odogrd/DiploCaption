@@ -45,38 +45,71 @@
 }
 
 :root {
+  /* LIGHT EDITORIAL THEME */
+  --background: 210 30% 97%;
+  --foreground: 224 47% 12%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 224 47% 12%;
+  --card-border: 215 20% 85%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 224 47% 12%;
+  --popover-border: 215 20% 85%;
+
+  --primary: 46 65% 40%; /* Darker gold for light bg contrast */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 215 20% 92%;
+  --secondary-foreground: 224 47% 12%;
+
+  --muted: 215 20% 93%;
+  --muted-foreground: 215 16% 42%;
+
+  --accent: 215 20% 92%;
+  --accent-foreground: 224 47% 12%;
+
+  --destructive: 0 84% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 215 20% 82%;
+  --input: 215 20% 91%;
+  --ring: 46 65% 40%;
+
+  --radius: 0.5rem;
+}
+
+.dark {
   /* DARK EDITORIAL INTELLIGENCE THEME */
-  --background: 224 47% 8%; /* #0B101E */
-  --foreground: 210 20% 98%; /* #F8F9FA */
-  
-  --card: 222 35% 12%; /* #141C2B */
+  --background: 224 47% 8%;
+  --foreground: 210 20% 98%;
+
+  --card: 222 35% 12%;
   --card-foreground: 210 20% 98%;
-  --card-border: 215 25% 18%; /* #222B3B */
-  
+  --card-border: 215 25% 18%;
+
   --popover: 224 47% 8%;
   --popover-foreground: 210 20% 98%;
   --popover-border: 215 25% 18%;
-  
-  --primary: 46 65% 52%; /* Muted Gold #D4AF37 */
-  --primary-foreground: 224 47% 8%; /* Navy text on Gold */
-  
+
+  --primary: 46 65% 52%;
+  --primary-foreground: 224 47% 8%;
+
   --secondary: 215 25% 20%;
   --secondary-foreground: 210 20% 98%;
-  
+
   --muted: 215 25% 14%;
   --muted-foreground: 215 16% 65%;
-  
+
   --accent: 215 25% 20%;
   --accent-foreground: 210 20% 98%;
-  
+
   --destructive: 0 84% 60%;
   --destructive-foreground: 210 40% 98%;
-  
+
   --border: 215 25% 18%;
   --input: 215 25% 14%;
   --ring: 46 65% 52%;
-  
-  --radius: 0.5rem;
 }
 
 @layer base {
@@ -109,5 +142,8 @@
 
 /* Glassmorphism utilities */
 .glass-panel {
-  @apply bg-card/80 backdrop-blur-xl border border-white/5 shadow-2xl shadow-black/50;
+  @apply bg-card/90 backdrop-blur-xl border border-border shadow-xl shadow-black/10;
+}
+.dark .glass-panel {
+  @apply bg-card/80 shadow-black/50;
 }

@@ -35,6 +35,9 @@ export default function Generator() {
   const [mapType, setMapType] = useState<"geopolitical" | "historical" | "data-infographic" | "other">("geopolitical");
   const [contextNotes, setContextNotes] = useState("");
 
+  // Platform selection — which platforms to generate for
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set(PLATFORM_ORDER));
+
   // Overrides State — per-platform, with audience + variant array
   const [overrides, setOverrides] = useState<Record<string, PlatformOverride>>({});
   const [showOverrides, setShowOverrides] = useState(false);
@@ -88,6 +91,9 @@ export default function Generator() {
   const handleGenerate = async () => {
     if (!base64Data || !file) return;
     setResults(null);
+    const filteredOverrides = Object.fromEntries(
+      Object.entries(overrides).filter(([pid]) => selectedPlatforms.has(pid))
+    );
     try {
       const data = await generateMutation.mutateAsync({
         data: {
@@ -95,7 +101,7 @@ export default function Generator() {
           imageMediaType,
           mapType,
           contextNotes: contextNotes || null,
-          platformOverrides: overrides as any,
+          platformOverrides: filteredOverrides as any,
         },
       });
       setResults(data as any);
@@ -203,7 +209,7 @@ export default function Generator() {
                 {...getRootProps()}
                 className={cn(
                   "relative h-64 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all overflow-hidden",
-                  isDragActive ? "border-primary bg-primary/5" : "border-white/20 hover:border-white/40 hover:bg-white/[0.02]",
+                  isDragActive ? "border-primary bg-primary/5" : "border-border hover:border-border/70 hover:bg-muted/10",
                   preview ? "border-none" : "",
                 )}
               >
@@ -213,7 +219,7 @@ export default function Generator() {
                     <img src={preview} alt="Upload preview" className="absolute inset-0 w-full h-full object-cover opacity-60" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                     <div className="relative z-10 mt-auto w-full flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-white bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10">
+                      <div className="flex items-center gap-2 bg-background/70 backdrop-blur-md px-3 py-1.5 rounded-lg border border-border text-foreground">
                         <FileImage className="w-4 h-4" />
                         <span className="text-xs font-mono truncate max-w-[120px]">{file?.name}</span>
                         {compressedBytes != null
@@ -228,7 +234,7 @@ export default function Generator() {
                   </>
                 ) : (
                   <>
-                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
                       <UploadCloud className="w-8 h-8 text-primary" />
                     </div>
                     <p className="font-medium text-foreground mb-1">Drag map image here</p>
@@ -248,7 +254,7 @@ export default function Generator() {
                 <select
                   value={mapType}
                   onChange={(e) => setMapType(e.target.value as any)}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-primary/50 appearance-none font-sans"
+                  className="w-full bg-input border border-border rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-primary/50 appearance-none font-sans"
                 >
                   <option value="geopolitical">Geopolitical / Boundaries</option>
                   <option value="historical">Historical Context</option>
@@ -269,7 +275,7 @@ export default function Generator() {
                   onChange={(e) => setContextNotes(e.target.value)}
                   maxLength={500}
                   placeholder="Key takeaways, specific framing, or required talking points..."
-                  className="w-full h-32 bg-black/40 border border-white/10 rounded-xl p-4 text-sm text-foreground focus:outline-none focus:border-primary/50 resize-none font-sans placeholder:text-white/20"
+                  className="w-full h-32 bg-input border border-border rounded-xl p-4 text-sm text-foreground focus:outline-none focus:border-primary/50 resize-none font-sans placeholder:text-muted-foreground/40"
                 />
               </div>
             </div>
@@ -293,14 +299,14 @@ export default function Generator() {
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden mt-6"
                 >
-                  <div className="bg-black/20 rounded-2xl p-6 border border-white/5 space-y-6">
+                  <div className="bg-muted/40 rounded-2xl p-6 border border-border space-y-6">
                     <p className="text-sm text-muted-foreground">Adjust instructions for this specific generation. Will not overwrite global settings.</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {PLATFORM_ORDER.map((pid) => {
                         const po = overrides[pid];
                         if (!po) return null;
                         return (
-                          <div key={pid} className="space-y-3 bg-white/[0.02] p-4 rounded-xl border border-white/5">
+                          <div key={pid} className="space-y-3 bg-background/60 p-4 rounded-xl border border-border/50">
                             <div className="flex items-center gap-2 mb-1">
                               <PlatformIcon platform={pid} />
                               <span className="font-semibold text-sm">{platformLabel(pid)}</span>
@@ -309,7 +315,7 @@ export default function Generator() {
                               value={po.audience}
                               onChange={(e) => setOverrides(prev => ({ ...prev, [pid]: { ...prev[pid], audience: e.target.value } }))}
                               placeholder="Audience"
-                              className="w-full bg-black/40 border border-white/5 rounded-lg px-3 py-2 text-xs focus:border-primary/50"
+                              className="w-full bg-input border border-border rounded-lg px-3 py-2 text-xs focus:border-primary/50"
                             />
                             {po.variants.map((v, i) => (
                               <div key={i} className="space-y-1">
@@ -322,7 +328,7 @@ export default function Generator() {
                                     setOverrides(prev => ({ ...prev, [pid]: { ...prev[pid], variants } }));
                                   }}
                                   placeholder="Instructions"
-                                  className="w-full h-16 bg-black/40 border border-white/5 rounded-lg px-3 py-2 text-xs focus:border-primary/50 resize-none"
+                                  className="w-full h-16 bg-input border border-border rounded-lg px-3 py-2 text-xs focus:border-primary/50 resize-none"
                                 />
                               </div>
                             ))}
@@ -336,18 +342,56 @@ export default function Generator() {
             </AnimatePresence>
           </div>
 
+          {/* Platform Selection */}
+          <div className="mt-8 pt-6 border-t border-white/10">
+            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">
+              Platforms to Generate
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {PLATFORM_ORDER.map((pid) => {
+                const selected = selectedPlatforms.has(pid);
+                return (
+                  <button
+                    key={pid}
+                    type="button"
+                    onClick={() => {
+                      setSelectedPlatforms(prev => {
+                        const next = new Set(prev);
+                        if (next.has(pid)) {
+                          if (next.size > 1) next.delete(pid);
+                        } else {
+                          next.add(pid);
+                        }
+                        return next;
+                      });
+                    }}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all",
+                      selected
+                        ? "bg-primary/15 border-primary/40 text-primary"
+                        : "bg-black/20 border-white/10 text-muted-foreground hover:border-white/20"
+                    )}
+                  >
+                    <PlatformIcon platform={pid} />
+                    {platformLabel(pid)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Generate Action */}
           <div className="mt-8 pt-8 border-t border-white/10 flex justify-end">
             <Button
               size="lg"
               className="w-full md:w-auto min-w-[200px] h-14 text-base tracking-wide font-bold"
-              disabled={!file || !base64Data || generateMutation.isPending}
+              disabled={!file || !base64Data || generateMutation.isPending || selectedPlatforms.size === 0}
               onClick={handleGenerate}
             >
               {generateMutation.isPending ? (
                 <><Loader2 className="w-5 h-5 mr-2 animate-spin" />ANALYZING...</>
               ) : (
-                <><Sparkles className="w-5 h-5 mr-2" />GENERATE CAPTIONS</>
+                <><Sparkles className="w-5 h-5 mr-2" />GENERATE FOR {selectedPlatforms.size} {selectedPlatforms.size === 1 ? "PLATFORM" : "PLATFORMS"}</>
               )}
             </Button>
           </div>

@@ -63,7 +63,7 @@ export function CaptionCard({ platform, variantName, caption, onUpdate, onRefine
 
   return (
     <div className="glass-panel rounded-2xl overflow-hidden flex flex-col">
-      <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+      <div className="px-6 py-4 border-b border-border/40 flex items-center justify-between bg-muted/20">
         <div className="flex items-center gap-3">
           <PlatformIcon platform={platform} className="text-xl" />
           <div>
@@ -73,7 +73,7 @@ export function CaptionCard({ platform, variantName, caption, onUpdate, onRefine
         </div>
         <div className="flex items-center gap-2">
           {limit && (
-            <span className={`text-xs font-mono px-2 py-1 rounded-md ${isOverLimit ? 'bg-destructive/20 text-destructive' : 'bg-white/5 text-muted-foreground'}`}>
+            <span className={`text-xs font-mono px-2 py-1 rounded-md ${isOverLimit ? 'bg-destructive/20 text-destructive' : 'bg-muted text-muted-foreground'}`}>
               {localText.length} / {limit}
             </span>
           )}
@@ -93,7 +93,7 @@ export function CaptionCard({ platform, variantName, caption, onUpdate, onRefine
         {isEditing ? (
           <div className="space-y-3">
             <textarea
-              className="w-full h-48 bg-black/20 border border-white/10 rounded-xl p-4 text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 resize-none font-sans"
+              className="w-full h-48 bg-input border border-border rounded-xl p-4 text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 resize-none font-sans"
               value={localText}
               onChange={(e) => setLocalText(e.target.value)}
             />
@@ -110,19 +110,19 @@ export function CaptionCard({ platform, variantName, caption, onUpdate, onRefine
             <p className="whitespace-pre-wrap text-muted-foreground group-hover:text-foreground transition-colors font-sans leading-relaxed">
               {localText || "No caption generated."}
             </p>
-            <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 p-1 rounded-md border border-white/10">
+            <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 p-1 rounded-md border border-border">
               <Edit2 className="w-4 h-4 text-muted-foreground" />
             </div>
           </div>
         )}
       </div>
 
-      <div className="px-6 py-4 border-t border-white/5 bg-black/20 flex flex-wrap items-center justify-between gap-4">
+      <div className="px-6 py-4 border-t border-border/40 bg-muted/20 flex flex-wrap items-center justify-between gap-4">
         <div className="flex gap-2">
           <Button 
             variant="outline" 
             size="sm" 
-            className="gap-2 border-white/10 hover:border-primary/50 hover:text-primary"
+            className="gap-2 border-border hover:border-primary/50 hover:text-primary"
             onClick={() => setIsRefiningPanelOpen(!isRefiningPanelOpen)}
           >
             <Sparkles className="w-4 h-4" />
@@ -153,7 +153,7 @@ export function CaptionCard({ platform, variantName, caption, onUpdate, onRefine
               <input
                 type="text"
                 placeholder="E.g., Make it punchier, add more emojis..."
-                className="flex-1 bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary"
+                className="flex-1 bg-input border border-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-primary text-foreground"
                 value={refineInstruction}
                 onChange={(e) => setRefineInstruction(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleRefineSubmit()}

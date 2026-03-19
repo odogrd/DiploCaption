@@ -1,0 +1,50 @@
+Yes, there is a direct link between the two.                                                   
+                                                                                                 
+  Here's why:                                                                                    
+                                                                                                 
+  What's happening                                                                               
+                                                                                                 
+  Your app has two separate parts that both need to run for login to work:                       
+                                                                                                 
+  1. Frontend (the visual interface) — served by the Vite dev server                             
+  2. API server (artifacts/api-server) — handles login, sessions, captions, etc.
+                                                                                                 
+  When your browser visits the published app and you click "Login", it sends a request to        
+  /api/auth/login. That request has to reach the API server to be processed. The frontend alone  
+  cannot handle it.                                                                              
+                  
+  The problem
+
+  The published app is not running its own independent API server. The API server only starts    
+  when you open the development environment in Replit (which starts both Vite and the API server
+  together).                                                                                     
+                  
+  So when you open Replit's dev app:                                                             
+  - The API server wakes up and starts listening
+  - The published app's login request can now be processed ✅                                    
+                                                             
+  When you close the dev tab:                                                                    
+  - The API server stops                                                                         
+  - The published app's login request goes nowhere ❌                                            
+                                                                                                 
+  Why login "works" when dev is open                                                             
+                                                                                                 
+  The published app and the dev app are running in the same Replit environment. They share the   
+  same processes. The published URL is just a public-facing version of the same running server — 
+  not a truly independent deployment.                                                            
+                  
+  The fix                                                                                        
+  
+  The artifacts/api-server is listed in .replit as an artifact, which means it should be deployed
+   independently. The most likely issue is that the deployment either failed, or key environment 
+  variables are missing in the deployment configuration (like APP_USERNAME, APP_PASSWORD,        
+  DATABASE_URL).  
+
+  To check: In Replit, go to the Deployments tab and look at:                                    
+  1. Whether the deployment actually succeeded (no build/start errors)
+  2. Whether the secrets/environment variables (APP_USERNAME, APP_PASSWORD, SESSION_SECRET,      
+  DATABASE_URL, ANTHROPIC_API_KEY) are configured in the deployment settings (not just the dev
+  environment)                                                                                   
+                  
+  If the env vars are only set in the dev environment, the deployed API server won't have them   
+  and will fail silently.  

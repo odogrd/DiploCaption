@@ -1,3 +1,16 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+  <rect width="180" height="180" rx="36" fill="#1a1a2e"/>
+  <rect width="180" height="180" rx="36" fill="url(#bg-grad)" opacity="0.6"/>
+  <!-- Compass circle -->
+  <circle cx="90" cy="90" r="52" stroke="#D4AF37" stroke-width="7" fill="none" opacity="0.9"/>
+  <!-- Compass needle (north - gold) -->
+  <polygon points="90,46 100,84 90,78 80,84" fill="#D4AF37"/>
+  <!-- Compass needle (south - dimmed) -->
+  <polygon points="90,134 100,96 90,102 80,96" fill="#D4AF37" opacity="0.35"/>
+  <defs>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#D4AF37" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
 </svg>

@@ -4,7 +4,8 @@
       "Bash(find /home/runner/workspace/artifacts/api-server -name .env* -type f)",
       "Bash(grep -r GenerateCaptionsResponse /home/runner/workspace/lib/api-zod/src/ --include=*.ts)",
       "Bash(printenv)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(grep -r \"PORT\\\\|process.env\" /home/runner/workspace/artifacts -include=\"*.ts\")"
     ]
   }
 }
